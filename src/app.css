@@ -23,6 +23,7 @@ body {
 }
 
 button,
+input,
 textarea {
   font: inherit;
 }
@@ -109,6 +110,69 @@ label {
   font-weight: 800;
 }
 
+label:not(:first-child) {
+  margin-top: 18px;
+}
+
+.upload-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px dashed rgba(125, 211, 252, 0.38);
+  border-radius: 20px;
+  padding: 18px;
+  background: rgba(14, 165, 233, 0.08);
+  cursor: pointer;
+}
+
+.upload-box::before {
+  content: '+';
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 14px;
+  color: #07111f;
+  background: #7dd3fc;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.upload-box input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-box strong,
+.upload-box span {
+  display: block;
+}
+
+.upload-box strong {
+  color: #f8fafc;
+}
+
+.upload-box span {
+  margin-top: 2px;
+  color: #93a4b8;
+  font-size: 0.9rem;
+}
+
+.qr-preview {
+  display: block;
+  width: 108px;
+  height: 108px;
+  margin-top: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 18px;
+  object-fit: cover;
+  background: #fff;
+}
+
 textarea {
   width: 100%;
   min-height: 138px;
@@ -152,6 +216,27 @@ textarea::placeholder {
   border-radius: 24px;
   padding: 22px;
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(34, 197, 94, 0.1));
+}
+
+.key-card {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.key-card p {
+  max-width: 260px;
+  margin: 0;
+  color: #dbeafe;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
 }
 
 .muted {
@@ -264,6 +349,15 @@ dd {
   .otp-card {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .key-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .key-card p {
+    max-width: none;
   }
 
   button {

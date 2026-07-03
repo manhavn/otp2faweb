@@ -1,11 +1,16 @@
 <script lang="ts">
+  import jsQR from 'jsqr'
+
   const STEP_SECONDS = 30
   const DIGITS = 6
 
   let secretInput = $state('')
   let code = $state('------')
   let error = $state('')
+  let qrError = $state('')
+  let qrPreview = $state('')
   let copied = $state(false)
+  let copiedKey = $state(false)
   let now = $state(Date.now())
 
   const secondsRemaining = $derived(STEP_SECONDS - (Math.floor(now / 1000) % STEP_SECONDS))
@@ -25,6 +30,7 @@
     secretInput
     now
     copied = false
+    copiedKey = false
     void generateCode()
   })
 
@@ -121,6 +127,48 @@
     await navigator.clipboard.writeText(code)
     copied = true
   }
+
+  async function copyKey() {
+    if (!parsedSecret.secret) return
+
+    await navigator.clipboard.writeText(parsedSecret.secret)
+    copiedKey = true
+  }
+
+  async function decodeQrImage(event: Event) {
+    const input = event.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+
+    qrError = ''
+    if (!file) return
+
+    if (qrPreview) URL.revokeObjectURL(qrPreview)
+    qrPreview = URL.createObjectURL(file)
+
+    try {
+      const bitmap = await createImageBitmap(file)
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d', { willReadFrequently: true })
+
+      if (!context) throw new Error('Trình duyệt không hỗ trợ đọc ảnh QR.')
+
+      canvas.width = bitmap.width
+      canvas.height = bitmap.height
+      context.drawImage(bitmap, 0, 0)
+      bitmap.close()
+
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+      const result = jsQR(imageData.data, imageData.width, imageData.height)
+
+      if (!result?.data) throw new Error('Không tìm thấy mã QR trong ảnh này.')
+
+      secretInput = result.data
+    } catch (err) {
+      qrError = err instanceof Error ? err.message : 'Không thể đọc mã QR từ ảnh này.'
+    } finally {
+      input.value = ''
+    }
+  }
 </script>
 
 <main class="shell">
@@ -128,12 +176,29 @@
     <p class="eyebrow">TOTP 2FA Generator</p>
     <h1 id="title">Nhập khóa 2FA để lấy mã OTP theo thời gian</h1>
     <p class="intro">
-      Dán secret Base32 hoặc URI <code>otpauth://</code>. Mã được tính trực tiếp trong trình duyệt
-      bằng Web Crypto, không gửi khóa ra ngoài.
+      Dán secret Base32, URI <code>otpauth://</code>, hoặc tải ảnh QR 2FA. Mã được tính trực
+      tiếp trong trình duyệt, không gửi khóa ra ngoài.
     </p>
   </section>
 
   <section class="panel" aria-label="Tạo mã OTP">
+    <label for="qr-image">Ảnh QR code</label>
+    <div class="upload-box">
+      <input id="qr-image" type="file" accept="image/*" onchange={decodeQrImage} />
+      <div>
+        <strong>Chọn ảnh QR 2FA</strong>
+        <span>Hỗ trợ PNG, JPG, WebP hoặc ảnh chụp màn hình.</span>
+      </div>
+    </div>
+
+    {#if qrPreview}
+      <img class="qr-preview" src={qrPreview} alt="Ảnh QR đã chọn" />
+    {/if}
+
+    {#if qrError}
+      <p class="error">{qrError}</p>
+    {/if}
+
     <label for="secret">Khóa bí mật</label>
     <textarea
       id="secret"
@@ -146,6 +211,16 @@
     {#if error}
       <p class="error">{error}</p>
     {/if}
+
+    <div class="key-card">
+      <div>
+        <span class="muted">Key trích xuất</span>
+        <p>{parsedSecret.secret || 'Chưa có key'}</p>
+      </div>
+      <button type="button" onclick={copyKey} disabled={!parsedSecret.secret}>
+        {copiedKey ? 'Đã copy' : 'Copy key'}
+      </button>
+    </div>
 
     <div class="otp-card">
       <div>
