@@ -50,6 +50,21 @@ input[type='text']::placeholder {
   color: #64748b;
 }
 
+input[type='number'] {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 16px;
+  padding: 13px 15px;
+  color: #eff6ff;
+  background: rgba(2, 6, 23, 0.72);
+  outline: none;
+}
+
+input[type='number']:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
 button {
   border: 0;
 }
@@ -310,6 +325,59 @@ textarea::placeholder {
   padding: 12px 14px;
   color: #fecaca;
   background: rgba(239, 68, 68, 0.12);
+}
+
+.mode-card {
+  margin: 18px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  border: 0;
+  padding: 0;
+}
+
+.mode-card legend {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+  color: #dbeafe;
+  font-weight: 800;
+}
+
+.mode-card label {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  padding: 13px 14px;
+  color: #a9b8cc;
+  background: rgba(15, 23, 42, 0.58);
+  cursor: pointer;
+}
+
+.mode-card label.active {
+  border-color: rgba(125, 211, 252, 0.48);
+  color: #eff6ff;
+  background: rgba(14, 165, 233, 0.14);
+}
+
+.mode-card input {
+  accent-color: #7dd3fc;
+}
+
+.counter-row {
+  margin-top: 18px;
+}
+
+.counter-row label {
+  margin-top: 0;
+}
+
+.counter-row div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
 }
 
 .otp-card {
@@ -604,7 +672,12 @@ dd span {
 
   .tag-controls,
   .qr-actions,
+  .counter-row div,
   .download-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-card {
     grid-template-columns: 1fr;
   }
 

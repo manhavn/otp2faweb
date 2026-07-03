@@ -15,6 +15,8 @@
   let copiedIssuer = $state(false)
   let copiedAccount = $state(false)
   let now = $state(Date.now())
+  let otpMode = $state<'totp' | 'hotp'>('totp')
+  let hotpCounter = $state(0)
   let tagInput = $state('')
   let tags = $state<string[]>([])
   let draggedTagIndex = $state<number | null>(null)
@@ -43,6 +45,8 @@
 
   $effect(() => {
     secretInput
+    otpMode
+    hotpCounter
     now
     copied = false
     copiedKey = false
@@ -121,7 +125,11 @@
         false,
         ['sign'],
       )
-      const counter = Math.floor(now / 1000 / STEP_SECONDS)
+      const counter = otpMode === 'totp' ? Math.floor(now / 1000 / STEP_SECONDS) : hotpCounter
+      if (!Number.isSafeInteger(counter) || counter < 0) {
+        throw new Error('Bộ đếm phải là số nguyên từ 0 trở lên.')
+      }
+
       const hmac = new Uint8Array(await crypto.subtle.sign('HMAC', key, counterToBytes(counter)))
       const offset = hmac[hmac.length - 1] & 0x0f
       const binary =
@@ -164,6 +172,11 @@
 
     await navigator.clipboard.writeText(parsedSecret.account)
     copiedAccount = true
+  }
+
+  function updateHotpCounter(event: Event) {
+    const value = Number((event.currentTarget as HTMLInputElement).value)
+    hotpCounter = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0
   }
 
   async function decodeQrImage(event: Event) {
@@ -383,6 +396,35 @@
       <p class="error">{error}</p>
     {/if}
 
+    <fieldset class="mode-card">
+      <legend>Loại OTP</legend>
+      <label class:active={otpMode === 'totp'}>
+        <input type="radio" name="otp-mode" value="totp" bind:group={otpMode} />
+        <span>Theo thời gian</span>
+      </label>
+      <label class:active={otpMode === 'hotp'}>
+        <input type="radio" name="otp-mode" value="hotp" bind:group={otpMode} />
+        <span>Theo bộ đếm</span>
+      </label>
+    </fieldset>
+
+    {#if otpMode === 'hotp'}
+      <div class="counter-row">
+        <label for="hotp-counter">Bộ đếm</label>
+        <div>
+          <input
+            id="hotp-counter"
+            type="number"
+            min="0"
+            step="1"
+            value={hotpCounter}
+            oninput={updateHotpCounter}
+          />
+          <button type="button" onclick={() => (hotpCounter += 1)}>+1</button>
+        </div>
+      </div>
+    {/if}
+
     <div class="key-card">
       <div>
         <span class="muted">Key trích xuất</span>
@@ -403,13 +445,20 @@
       </button>
     </div>
 
-    <div class="time-row">
-      <span>Còn {secondsRemaining}s</span>
-      <span>{STEP_SECONDS}s / chu kỳ</span>
-    </div>
-    <div class="progress" aria-hidden="true">
-      <span style={`width: ${progress}%`}></span>
-    </div>
+    {#if otpMode === 'totp'}
+      <div class="time-row">
+        <span>Còn {secondsRemaining}s</span>
+        <span>{STEP_SECONDS}s / chu kỳ</span>
+      </div>
+      <div class="progress" aria-hidden="true">
+        <span style={`width: ${progress}%`}></span>
+      </div>
+    {:else}
+      <div class="time-row">
+        <span>Bộ đếm hiện tại</span>
+        <span>{hotpCounter}</span>
+      </div>
+    {/if}
 
     {#if parsedSecret.issuer || parsedSecret.account}
       <dl class="meta">
