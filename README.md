@@ -1,47 +1,78 @@
-# Svelte + TS + Vite
+# OTP 2FA Web
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+Ứng dụng web Svelte/Vite để tạo mã TOTP 2FA, đọc QR code và tạo file nội dung từ danh sách tags.
 
-## Recommended IDE Setup
+## Tính Năng
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- Nhập nội dung `otpauth://` hoặc secret Base32 để tạo mã OTP 6 số.
+- Mã OTP tự cập nhật theo chu kỳ 30 giây.
+- Thanh thời gian giảm dần theo thời gian còn lại của mã hiện tại.
+- Upload ảnh QR code để tự đọc nội dung.
+- Quét QR code bằng camera thiết bị.
+- Hiển thị key trích xuất và hỗ trợ copy key.
+- Copy mã OTP hiện tại.
+- Thêm, xóa và kéo thả sắp xếp tags.
+- Preview nội dung tags theo định dạng `tag1|tag2|tag3`.
+- Nhập filename và tải xuống file chứa nội dung preview.
+- Tự chuẩn hóa filename, ví dụ `otp|GoogleLogin|user@gmail.com.txt` thành `otp-GoogleLogin-user-gmail.com.txt`.
 
-## Need an official Svelte framework?
+## Cài Đặt
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
-
-## Technical considerations
-
-**Why use this over SvelteKit?**
-
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
-
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+npm install
 ```
+
+## Chạy Development
+
+```bash
+npm run dev
+```
+
+Sau đó mở URL Vite hiển thị trong terminal, thường là:
+
+```text
+http://localhost:5173
+```
+
+## Kiểm Tra
+
+```bash
+npm run check
+```
+
+## Build Production
+
+```bash
+npm run build
+```
+
+## Preview Build
+
+```bash
+npm run preview
+```
+
+## Cách Dùng
+
+1. Dán secret Base32 hoặc URI `otpauth://` vào ô `Nội dung`.
+2. Hoặc chọn ảnh QR code bằng nút chọn ảnh.
+3. Hoặc bấm `Camera` để quét QR trực tiếp từ thiết bị.
+4. Xem key trích xuất và mã OTP hiện tại.
+5. Với phần tạo file, nhập tag rồi bấm `Add` hoặc nhấn `Enter`.
+6. Kéo thả tags để đổi thứ tự, nội dung preview sẽ tự cập nhật.
+7. Nhập tên file ở ô `Filename` và bấm `Download`.
+
+## Lưu Ý
+
+- Tất cả xử lý OTP, QR và tạo file chạy trên trình duyệt.
+- Secret/key không được gửi ra server.
+- Tính năng camera cần chạy trên `localhost` hoặc HTTPS để trình duyệt cho phép truy cập camera.
+- Web Crypto API cần môi trường browser hiện đại.
+
+## Công Nghệ
+
+- Svelte 5
+- Vite
+- TypeScript
+- Web Crypto API
+- jsQR
