@@ -19,6 +19,7 @@
       eyebrow: 'TOTP 2FA Generator',
       title: 'Enter a 2FA key to get time-based OTP codes',
       intro: 'Paste a Base32 secret, an otpauth:// URI, or upload a 2FA QR image. Codes are calculated directly in your browser without sending the key anywhere.',
+      sourceCode: 'Source code',
       qrSectionLabel: 'QR code image input',
       qrImage: 'QR code image',
       chooseQr: 'Choose a 2FA QR image',
@@ -77,6 +78,7 @@
       eyebrow: 'TOTP 2FA Generator',
       title: 'Nhập khóa 2FA để lấy mã OTP theo thời gian',
       intro: 'Dán secret Base32, URI otpauth://, hoặc tải ảnh QR 2FA. Mã được tính trực tiếp trong trình duyệt, không gửi khóa ra ngoài.',
+      sourceCode: 'Mã nguồn',
       qrSectionLabel: 'Nhập ảnh QR code',
       qrImage: 'Ảnh QR code',
       chooseQr: 'Chọn ảnh QR 2FA',
@@ -569,6 +571,9 @@
       <p class="intro">
         {t.intro}
       </p>
+      <a class="source-link" href="https://github.com/manhavn/otp2faweb" target="_blank" rel="noreferrer">
+        {t.sourceCode}
+      </a>
     </section>
 
     <section class="qr-card" aria-label={t.qrSectionLabel}>
