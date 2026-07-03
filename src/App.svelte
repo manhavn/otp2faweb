@@ -12,6 +12,8 @@
   let scanning = $state(false)
   let copied = $state(false)
   let copiedKey = $state(false)
+  let copiedIssuer = $state(false)
+  let copiedAccount = $state(false)
   let now = $state(Date.now())
   let tagInput = $state('')
   let tags = $state<string[]>([])
@@ -44,6 +46,8 @@
     now
     copied = false
     copiedKey = false
+    copiedIssuer = false
+    copiedAccount = false
     void generateCode()
   })
 
@@ -146,6 +150,20 @@
 
     await navigator.clipboard.writeText(parsedSecret.secret)
     copiedKey = true
+  }
+
+  async function copyIssuer() {
+    if (!parsedSecret.issuer) return
+
+    await navigator.clipboard.writeText(parsedSecret.issuer)
+    copiedIssuer = true
+  }
+
+  async function copyAccount() {
+    if (!parsedSecret.account) return
+
+    await navigator.clipboard.writeText(parsedSecret.account)
+    copiedAccount = true
   }
 
   async function decodeQrImage(event: Event) {
@@ -398,13 +416,23 @@
         {#if parsedSecret.issuer}
           <div>
             <dt>Nhà cung cấp</dt>
-            <dd>{parsedSecret.issuer}</dd>
+            <dd>
+              <span>{parsedSecret.issuer}</span>
+              <button type="button" class="meta-copy" onclick={copyIssuer}>
+                {copiedIssuer ? 'Đã copy' : 'Copy'}
+              </button>
+            </dd>
           </div>
         {/if}
         {#if parsedSecret.account}
           <div>
             <dt>Tài khoản</dt>
-            <dd>{parsedSecret.account}</dd>
+            <dd>
+              <span>{parsedSecret.account}</span>
+              <button type="button" class="meta-copy" onclick={copyAccount}>
+                {copiedAccount ? 'Đã copy' : 'Copy'}
+              </button>
+            </dd>
           </div>
         {/if}
       </dl>
