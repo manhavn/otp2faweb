@@ -44,23 +44,35 @@ code {
 }
 
 .shell {
-  width: min(1120px, 100%);
+  width: min(1360px, 100%);
   min-height: 100vh;
   margin: 0 auto;
-  padding: 64px 24px;
+  padding: 56px 32px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
-  align-items: center;
-  gap: 42px;
+  grid-template-columns: minmax(320px, 0.82fr) minmax(560px, 1.18fr);
+  align-items: start;
+  gap: 36px;
 }
 
-.hero-card {
-  padding: 46px;
+.side-column {
+  position: sticky;
+  top: 56px;
+  display: grid;
+  gap: 20px;
+}
+
+.hero-card,
+.qr-card {
+  padding: 38px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 36px;
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.32));
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(18px);
+}
+
+.qr-card {
+  padding: 28px;
 }
 
 .eyebrow {
@@ -87,7 +99,7 @@ h1 {
 }
 
 .intro {
-  max-width: 620px;
+  max-width: 540px;
   margin: 24px 0 0;
   color: #a9b8cc;
   font-size: 1.06rem;
@@ -97,7 +109,7 @@ h1 {
 .panel {
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 30px;
-  padding: 28px;
+  padding: 34px;
   background: rgba(8, 15, 29, 0.82);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
   backdrop-filter: blur(18px);
@@ -164,18 +176,37 @@ label:not(:first-child) {
 
 .qr-preview {
   display: block;
-  width: 108px;
-  height: 108px;
-  margin-top: 12px;
+  width: min(100%, 260px);
+  aspect-ratio: 1;
+  margin: 18px auto 0;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 18px;
+  border-radius: 24px;
   object-fit: cover;
   background: #fff;
 }
 
+.qr-placeholder {
+  display: grid;
+  width: min(100%, 260px);
+  aspect-ratio: 1;
+  margin: 18px auto 0;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 24px;
+  color: rgba(125, 211, 252, 0.38);
+  background:
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    rgba(2, 6, 23, 0.44);
+  background-size: 20px 20px;
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
 textarea {
   width: 100%;
-  min-height: 138px;
+  min-height: 154px;
   resize: vertical;
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 20px;
@@ -207,31 +238,31 @@ textarea::placeholder {
 }
 
 .otp-card {
-  margin-top: 20px;
+  margin-top: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
   border: 1px solid rgba(125, 211, 252, 0.2);
   border-radius: 24px;
-  padding: 22px;
+  padding: 28px;
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(34, 197, 94, 0.1));
 }
 
 .key-card {
-  margin-top: 16px;
+  margin-top: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 20px;
-  padding: 16px;
+  padding: 18px;
   background: rgba(15, 23, 42, 0.72);
 }
 
 .key-card p {
-  max-width: 260px;
+  max-width: 420px;
   margin: 0;
   color: #dbeafe;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
@@ -253,7 +284,7 @@ textarea::placeholder {
   margin: 0;
   color: #f8fafc;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
-  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-size: clamp(2.1rem, 5vw, 3.35rem);
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0.05em;
@@ -333,6 +364,18 @@ dd {
   overflow-wrap: anywhere;
 }
 
+@media (max-width: 1120px) {
+  .shell {
+    grid-template-columns: minmax(280px, 0.72fr) minmax(480px, 1.28fr);
+  }
+
+  .hero-card,
+  .qr-card,
+  .panel {
+    padding: 28px;
+  }
+}
+
 @media (max-width: 860px) {
   .shell {
     min-height: auto;
@@ -340,7 +383,12 @@ dd {
     grid-template-columns: 1fr;
   }
 
+  .side-column {
+    position: static;
+  }
+
   .hero-card,
+  .qr-card,
   .panel {
     border-radius: 24px;
     padding: 24px;

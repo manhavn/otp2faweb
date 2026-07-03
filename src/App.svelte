@@ -172,33 +172,39 @@
 </script>
 
 <main class="shell">
-  <section class="hero-card" aria-labelledby="title">
-    <p class="eyebrow">TOTP 2FA Generator</p>
-    <h1 id="title">Nhập khóa 2FA để lấy mã OTP theo thời gian</h1>
-    <p class="intro">
-      Dán secret Base32, URI <code>otpauth://</code>, hoặc tải ảnh QR 2FA. Mã được tính trực
-      tiếp trong trình duyệt, không gửi khóa ra ngoài.
-    </p>
-  </section>
+  <aside class="side-column">
+    <section class="hero-card" aria-labelledby="title">
+      <p class="eyebrow">TOTP 2FA Generator</p>
+      <h1 id="title">Nhập khóa 2FA để lấy mã OTP theo thời gian</h1>
+      <p class="intro">
+        Dán secret Base32, URI <code>otpauth://</code>, hoặc tải ảnh QR 2FA. Mã được tính trực
+        tiếp trong trình duyệt, không gửi khóa ra ngoài.
+      </p>
+    </section>
+
+    <section class="qr-card" aria-label="Nhập ảnh QR code">
+      <label for="qr-image">Ảnh QR code</label>
+      <div class="upload-box">
+        <input id="qr-image" type="file" accept="image/*" onchange={decodeQrImage} />
+        <div>
+          <strong>Chọn ảnh QR 2FA</strong>
+          <span>Hỗ trợ PNG, JPG, WebP hoặc ảnh chụp màn hình.</span>
+        </div>
+      </div>
+
+      {#if qrPreview}
+        <img class="qr-preview" src={qrPreview} alt="Ảnh QR đã chọn" />
+      {:else}
+        <div class="qr-placeholder" aria-hidden="true">QR</div>
+      {/if}
+
+      {#if qrError}
+        <p class="error">{qrError}</p>
+      {/if}
+    </section>
+  </aside>
 
   <section class="panel" aria-label="Tạo mã OTP">
-    <label for="qr-image">Ảnh QR code</label>
-    <div class="upload-box">
-      <input id="qr-image" type="file" accept="image/*" onchange={decodeQrImage} />
-      <div>
-        <strong>Chọn ảnh QR 2FA</strong>
-        <span>Hỗ trợ PNG, JPG, WebP hoặc ảnh chụp màn hình.</span>
-      </div>
-    </div>
-
-    {#if qrPreview}
-      <img class="qr-preview" src={qrPreview} alt="Ảnh QR đã chọn" />
-    {/if}
-
-    {#if qrError}
-      <p class="error">{qrError}</p>
-    {/if}
-
     <label for="secret">Khóa bí mật</label>
     <textarea
       id="secret"
