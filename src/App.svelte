@@ -288,7 +288,7 @@
   function downloadPreview() {
     if (!filePreview) return
 
-    const safeName = filename.trim().replace(/^\.+/, '') || 'otp-tags.txt'
+    const safeName = sanitizeFilename(filename) || 'otp-tags.txt'
     const blob = new Blob([filePreview], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -297,6 +297,14 @@
     link.download = safeName
     link.click()
     URL.revokeObjectURL(url)
+  }
+
+  function sanitizeFilename(value: string) {
+    return value.trim().replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|^\.+|-+$/g, '')
+  }
+
+  function updateFilename(event: Event) {
+    filename = sanitizeFilename((event.currentTarget as HTMLInputElement).value)
   }
 </script>
 
@@ -461,7 +469,7 @@
       <div class="download-row">
         <div>
           <label for="filename">Filename</label>
-          <input id="filename" type="text" bind:value={filename} placeholder="example.txt" />
+          <input id="filename" type="text" value={filename} oninput={updateFilename} placeholder="example.txt" />
         </div>
         <button type="button" onclick={downloadPreview} disabled={!filePreview}>Download</button>
       </div>
