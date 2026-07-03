@@ -3,6 +3,126 @@
 
   const STEP_SECONDS = 30
   const DIGITS = 6
+  const translations = {
+    en: {
+      invalidBase32: 'Secret can only contain Base32 characters A-Z and 2-7.',
+      missingSecret: 'No valid secret found.',
+      invalidCounter: 'Counter must be an integer greater than or equal to 0.',
+      codeError: 'Unable to generate an OTP from this secret.',
+      qrUnsupported: 'This browser does not support QR image decoding.',
+      qrNotFound: 'No QR code was found in this image.',
+      qrReadError: 'Unable to read a QR code from this image.',
+      fileOpenError: 'Unable to open this file.',
+      cameraUnsupported: 'This browser does not support camera scanning.',
+      cameraPreviewError: 'Unable to initialize the camera preview.',
+      cameraOpenError: 'Unable to open the camera for QR scanning.',
+      eyebrow: 'TOTP 2FA Generator',
+      title: 'Enter a 2FA key to get time-based OTP codes',
+      intro: 'Paste a Base32 secret, an otpauth:// URI, or upload a 2FA QR image. Codes are calculated directly in your browser without sending the key anywhere.',
+      qrSectionLabel: 'QR code image input',
+      qrImage: 'QR code image',
+      chooseQr: 'Choose a 2FA QR image',
+      qrFormats: 'PNG, JPG, WebP, or a screenshot.',
+      stop: 'Stop',
+      camera: 'Camera',
+      cameraVideoLabel: 'QR scanning camera',
+      cameraHint: 'Place the QR code inside the camera frame',
+      qrPreviewAlt: 'Selected QR image',
+      otpPanelLabel: 'Generate OTP code',
+      content: 'Content',
+      loadContent: 'Load content',
+      contentPlaceholder: 'Enter any content, a Base32 secret, or otpauth://totp/...',
+      otpType: 'OTP type',
+      timeBased: 'Time-based',
+      counterBased: 'Counter-based',
+      counter: 'Counter',
+      extractedKey: 'Extracted key',
+      noKey: 'No key yet',
+      copied: 'Copied',
+      copyKey: 'Copy key',
+      currentCode: 'Current code',
+      copy: 'Copy',
+      remaining: 'Remaining',
+      period: 'period',
+      currentCounter: 'Current counter',
+      issuer: 'Issuer',
+      account: 'Account',
+      fileBuilder: 'File builder',
+      fileTitle: 'Create a file from tags',
+      generateContent: 'Generate content',
+      addTag: 'Add tag',
+      tagPlaceholder: 'Enter a tag, then press Enter or Add',
+      add: 'Add',
+      tagListLabel: 'Draggable tag list',
+      dragTagLabel: 'Drag to reorder tag',
+      removeTagLabel: 'Remove tag',
+      emptyTags: 'No tags yet. Tags will appear in this box after you add them.',
+      previewContent: 'Preview content',
+      filename: 'Filename',
+      download: 'Download',
+      language: 'Language',
+    },
+    vi: {
+      invalidBase32: 'Khóa chỉ được chứa ký tự Base32 A-Z và 2-7.',
+      missingSecret: 'Không tìm thấy khóa bí mật hợp lệ.',
+      invalidCounter: 'Bộ đếm phải là số nguyên từ 0 trở lên.',
+      codeError: 'Không thể tạo mã OTP từ khóa này.',
+      qrUnsupported: 'Trình duyệt không hỗ trợ đọc ảnh QR.',
+      qrNotFound: 'Không tìm thấy mã QR trong ảnh này.',
+      qrReadError: 'Không thể đọc mã QR từ ảnh này.',
+      fileOpenError: 'Không thể mở file này.',
+      cameraUnsupported: 'Trình duyệt không hỗ trợ camera scanner.',
+      cameraPreviewError: 'Không thể khởi tạo camera preview.',
+      cameraOpenError: 'Không thể mở camera để quét QR.',
+      eyebrow: 'TOTP 2FA Generator',
+      title: 'Nhập khóa 2FA để lấy mã OTP theo thời gian',
+      intro: 'Dán secret Base32, URI otpauth://, hoặc tải ảnh QR 2FA. Mã được tính trực tiếp trong trình duyệt, không gửi khóa ra ngoài.',
+      qrSectionLabel: 'Nhập ảnh QR code',
+      qrImage: 'Ảnh QR code',
+      chooseQr: 'Chọn ảnh QR 2FA',
+      qrFormats: 'PNG, JPG, WebP hoặc ảnh chụp màn hình.',
+      stop: 'Dừng',
+      camera: 'Camera',
+      cameraVideoLabel: 'Camera quét QR',
+      cameraHint: 'Đưa QR vào khung camera',
+      qrPreviewAlt: 'Ảnh QR đã chọn',
+      otpPanelLabel: 'Tạo mã OTP',
+      content: 'Nội dung',
+      loadContent: 'Load content',
+      contentPlaceholder: 'Nhập nội dung bất kỳ, secret Base32 hoặc otpauth://totp/...',
+      otpType: 'Loại OTP',
+      timeBased: 'Theo thời gian',
+      counterBased: 'Theo bộ đếm',
+      counter: 'Bộ đếm',
+      extractedKey: 'Key trích xuất',
+      noKey: 'Chưa có key',
+      copied: 'Đã copy',
+      copyKey: 'Copy key',
+      currentCode: 'Mã hiện tại',
+      copy: 'Copy',
+      remaining: 'Còn',
+      period: 'chu kỳ',
+      currentCounter: 'Bộ đếm hiện tại',
+      issuer: 'Nhà cung cấp',
+      account: 'Tài khoản',
+      fileBuilder: 'File builder',
+      fileTitle: 'Tạo file từ tags',
+      generateContent: 'Generate content',
+      addTag: 'Thêm tag',
+      tagPlaceholder: 'Nhập tag rồi Enter hoặc bấm Add',
+      add: 'Add',
+      tagListLabel: 'Danh sách tags có thể kéo thả',
+      dragTagLabel: 'Kéo để đổi vị trí tag',
+      removeTagLabel: 'Xóa tag',
+      emptyTags: 'Chưa có tag nào. Tags sẽ nằm trong box này sau khi add.',
+      previewContent: 'Preview content',
+      filename: 'Filename',
+      download: 'Download',
+      language: 'Ngôn ngữ',
+    },
+  }
+
+  type Language = keyof typeof translations
 
   let secretInput = $state('')
   let code = $state('------')
@@ -21,6 +141,7 @@
   let tags = $state<string[]>([])
   let draggedTagIndex = $state<number | null>(null)
   let filename = $state('otp-tags.txt')
+  let language = $state<Language>('en')
   let videoElement = $state<HTMLVideoElement | null>(null)
   let scanStream: MediaStream | null = null
   let scanFrameId = 0
@@ -30,6 +151,7 @@
   const parsedSecret = $derived(parseSecret(secretInput))
   const formattedCode = $derived(code === '------' ? code : `${code.slice(0, 3)} ${code.slice(3)}`)
   const filePreview = $derived(tags.join('|'))
+  const t = $derived(translations[language])
   const base32Pattern = /^[A-Z2-7]+=*$/
 
   $effect(() => {
@@ -49,6 +171,7 @@
     otpMode
     hotpCounter
     now
+    language
     copied = false
     copiedKey = false
     copiedIssuer = false
@@ -115,7 +238,7 @@
 
     for (const char of clean) {
       const index = alphabet.indexOf(char)
-      if (index === -1) throw new Error('Khóa chỉ được chứa ký tự Base32 A-Z và 2-7.')
+      if (index === -1) throw new Error(t.invalidBase32)
 
       value = (value << 5) | index
       bits += 5
@@ -145,7 +268,7 @@
 
     try {
       const keyBytes = base32ToBytes(parsedSecret.secret)
-      if (keyBytes.length === 0) throw new Error('Không tìm thấy khóa bí mật hợp lệ.')
+      if (keyBytes.length === 0) throw new Error(t.missingSecret)
 
       const key = await crypto.subtle.importKey(
         'raw',
@@ -156,7 +279,7 @@
       )
       const counter = otpMode === 'totp' ? Math.floor(now / 1000 / STEP_SECONDS) : hotpCounter
       if (!Number.isSafeInteger(counter) || counter < 0) {
-        throw new Error('Bộ đếm phải là số nguyên từ 0 trở lên.')
+        throw new Error(t.invalidCounter)
       }
 
       const hmac = new Uint8Array(await crypto.subtle.sign('HMAC', key, counterToBytes(counter)))
@@ -171,7 +294,7 @@
       error = ''
     } catch (err) {
       code = '------'
-      error = err instanceof Error ? err.message : 'Không thể tạo mã OTP từ khóa này.'
+      error = err instanceof Error ? err.message : t.codeError
     }
   }
 
@@ -223,7 +346,7 @@
       const canvas = document.createElement('canvas')
       const context = canvas.getContext('2d', { willReadFrequently: true })
 
-      if (!context) throw new Error('Trình duyệt không hỗ trợ đọc ảnh QR.')
+      if (!context) throw new Error(t.qrUnsupported)
 
       canvas.width = bitmap.width
       canvas.height = bitmap.height
@@ -233,11 +356,11 @@
       const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
       const result = jsQR(imageData.data, imageData.width, imageData.height)
 
-      if (!result?.data) throw new Error('Không tìm thấy mã QR trong ảnh này.')
+      if (!result?.data) throw new Error(t.qrNotFound)
 
       secretInput = result.data
     } catch (err) {
-      qrError = err instanceof Error ? err.message : 'Không thể đọc mã QR từ ảnh này.'
+      qrError = err instanceof Error ? err.message : t.qrReadError
     } finally {
       input.value = ''
     }
@@ -252,7 +375,7 @@
     try {
       secretInput = await file.text()
     } catch {
-      error = 'Không thể mở file này.'
+      error = t.fileOpenError
     } finally {
       input.value = ''
     }
@@ -263,7 +386,7 @@
 
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error('Trình duyệt không hỗ trợ camera scanner.')
+        throw new Error(t.cameraUnsupported)
       }
 
       stopCameraScan()
@@ -273,14 +396,14 @@
         audio: false,
       })
 
-      if (!videoElement) throw new Error('Không thể khởi tạo camera preview.')
+      if (!videoElement) throw new Error(t.cameraPreviewError)
 
       videoElement.srcObject = scanStream
       await videoElement.play()
       scanCameraFrame()
     } catch (err) {
       stopCameraScan()
-      qrError = err instanceof Error ? err.message : 'Không thể mở camera để quét QR.'
+      qrError = err instanceof Error ? err.message : t.cameraOpenError
     }
   }
 
@@ -431,36 +554,45 @@
 <main class="shell">
   <aside class="side-column">
     <section class="hero-card" aria-labelledby="title">
-      <p class="eyebrow">TOTP 2FA Generator</p>
-      <h1 id="title">Nhập khóa 2FA để lấy mã OTP theo thời gian</h1>
+      <div class="hero-topline">
+        <p class="eyebrow">{t.eyebrow}</p>
+        <div class="language-switcher" aria-label={t.language}>
+          <button type="button" class:active={language === 'en'} aria-pressed={language === 'en'} onclick={() => (language = 'en')}>
+            EN
+          </button>
+          <button type="button" class:active={language === 'vi'} aria-pressed={language === 'vi'} onclick={() => (language = 'vi')}>
+            VI
+          </button>
+        </div>
+      </div>
+      <h1 id="title">{t.title}</h1>
       <p class="intro">
-        Dán secret Base32, URI <code>otpauth://</code>, hoặc tải ảnh QR 2FA. Mã được tính trực
-        tiếp trong trình duyệt, không gửi khóa ra ngoài.
+        {t.intro}
       </p>
     </section>
 
-    <section class="qr-card" aria-label="Nhập ảnh QR code">
-      <label for="qr-image">Ảnh QR code</label>
+    <section class="qr-card" aria-label={t.qrSectionLabel}>
+      <label for="qr-image">{t.qrImage}</label>
       <div class="qr-actions">
         <div class="upload-box">
           <input id="qr-image" type="file" accept="image/*" onchange={decodeQrImage} />
           <div>
-            <strong>Chọn ảnh QR 2FA</strong>
-            <span>PNG, JPG, WebP hoặc ảnh chụp màn hình.</span>
+            <strong>{t.chooseQr}</strong>
+            <span>{t.qrFormats}</span>
           </div>
         </div>
         <button type="button" class="camera-button" onclick={scanning ? stopCameraScan : startCameraScan}>
-          {scanning ? 'Dừng' : 'Camera'}
+          {scanning ? t.stop : t.camera}
         </button>
       </div>
 
       {#if scanning}
         <div class="camera-preview">
-          <video bind:this={videoElement} playsinline muted aria-label="Camera quét QR"></video>
-          <span>Đưa QR vào khung camera</span>
+          <video bind:this={videoElement} playsinline muted aria-label={t.cameraVideoLabel}></video>
+          <span>{t.cameraHint}</span>
         </div>
       {:else if qrPreview}
-        <img class="qr-preview" src={qrPreview} alt="Ảnh QR đã chọn" />
+        <img class="qr-preview" src={qrPreview} alt={t.qrPreviewAlt} />
       {:else}
         <div class="qr-placeholder" aria-hidden="true">QR</div>
       {/if}
@@ -471,10 +603,10 @@
     </section>
   </aside>
 
-  <section class="panel" aria-label="Tạo mã OTP">
+  <section class="panel" aria-label={t.otpPanelLabel}>
     <div class="secret-heading">
-      <label for="secret">Nội dung</label>
-      <label class="open-file-button" for="secret-file">Load content</label>
+      <label for="secret">{t.content}</label>
+      <label class="open-file-button" for="secret-file">{t.loadContent}</label>
       <input id="secret-file" class="visually-hidden" type="file" accept=".txt,text/plain" onchange={openSecretFile} />
     </div>
     <textarea
@@ -482,7 +614,7 @@
       bind:value={secretInput}
       autocomplete="off"
       spellcheck="false"
-      placeholder="Nhập nội dung bất kỳ, secret Base32 hoặc otpauth://totp/..."
+      placeholder={t.contentPlaceholder}
     ></textarea>
 
     {#if error}
@@ -490,20 +622,20 @@
     {/if}
 
     <fieldset class="mode-card">
-      <legend>Loại OTP</legend>
+      <legend>{t.otpType}</legend>
       <label class:active={otpMode === 'totp'}>
         <input type="radio" name="otp-mode" value="totp" bind:group={otpMode} />
-        <span>Theo thời gian</span>
+        <span>{t.timeBased}</span>
       </label>
       <label class:active={otpMode === 'hotp'}>
         <input type="radio" name="otp-mode" value="hotp" bind:group={otpMode} />
-        <span>Theo bộ đếm</span>
+        <span>{t.counterBased}</span>
       </label>
     </fieldset>
 
     {#if otpMode === 'hotp'}
       <div class="counter-row">
-        <label for="hotp-counter">Bộ đếm</label>
+        <label for="hotp-counter">{t.counter}</label>
         <div>
           <input
             id="hotp-counter"
@@ -520,35 +652,35 @@
 
     <div class="key-card">
       <div>
-        <span class="muted">Key trích xuất</span>
-        <p>{parsedSecret.secret || 'Chưa có key'}</p>
+        <span class="muted">{t.extractedKey}</span>
+        <p>{parsedSecret.secret || t.noKey}</p>
       </div>
       <button type="button" onclick={copyKey} disabled={!parsedSecret.secret}>
-        {copiedKey ? 'Đã copy' : 'Copy key'}
+        {copiedKey ? t.copied : t.copyKey}
       </button>
     </div>
 
     <div class="otp-card">
       <div>
-        <span class="muted">Mã hiện tại</span>
+        <span class="muted">{t.currentCode}</span>
         <p class="otp-code" aria-live="polite">{formattedCode}</p>
       </div>
       <button type="button" onclick={copyCode} disabled={code === '------'}>
-        {copied ? 'Đã copy' : 'Copy'}
+        {copied ? t.copied : t.copy}
       </button>
     </div>
 
     {#if otpMode === 'totp'}
       <div class="time-row">
-        <span>Còn {secondsRemaining}s</span>
-        <span>{STEP_SECONDS}s / chu kỳ</span>
+        <span>{t.remaining} {secondsRemaining}s</span>
+        <span>{STEP_SECONDS}s / {t.period}</span>
       </div>
       <div class="progress" aria-hidden="true">
         <span style={`width: ${progress}%`}></span>
       </div>
     {:else}
       <div class="time-row">
-        <span>Bộ đếm hiện tại</span>
+        <span>{t.currentCounter}</span>
         <span>{hotpCounter}</span>
       </div>
     {/if}
@@ -557,22 +689,22 @@
       <dl class="meta">
         {#if parsedSecret.issuer}
           <div>
-            <dt>Nhà cung cấp</dt>
+            <dt>{t.issuer}</dt>
             <dd>
               <span>{parsedSecret.issuer}</span>
               <button type="button" class="meta-copy" onclick={copyIssuer}>
-                {copiedIssuer ? 'Đã copy' : 'Copy'}
+                {copiedIssuer ? t.copied : t.copy}
               </button>
             </dd>
           </div>
         {/if}
         {#if parsedSecret.account}
           <div>
-            <dt>Tài khoản</dt>
+            <dt>{t.account}</dt>
             <dd>
               <span>{parsedSecret.account}</span>
               <button type="button" class="meta-copy" onclick={copyAccount}>
-                {copiedAccount ? 'Đã copy' : 'Copy'}
+                {copiedAccount ? t.copied : t.copy}
               </button>
             </dd>
           </div>
@@ -583,32 +715,32 @@
     <section class="file-card" aria-labelledby="file-title">
       <div class="section-heading">
         <div>
-          <span class="muted">File builder</span>
-          <h2 id="file-title">Tạo file từ tags</h2>
+          <span class="muted">{t.fileBuilder}</span>
+          <h2 id="file-title">{t.fileTitle}</h2>
         </div>
         <button type="button" class="generate-button" onclick={generateContent} disabled={!parsedSecret.secret}>
-          Generate content
+          {t.generateContent}
         </button>
       </div>
 
       <div class="tag-input-row">
-        <label for="tag-input">Thêm tag</label>
+        <label for="tag-input">{t.addTag}</label>
         <div class="tag-controls">
           <input
             id="tag-input"
             type="text"
             bind:value={tagInput}
             onkeydown={handleTagInputKeydown}
-            placeholder="Nhập tag rồi Enter hoặc bấm Add"
+            placeholder={t.tagPlaceholder}
           />
-          <button type="button" onclick={addTag}>Add</button>
+          <button type="button" onclick={addTag}>{t.add}</button>
         </div>
       </div>
 
       <div
         class="tag-box"
         role="list"
-        aria-label="Danh sách tags có thể kéo thả"
+        aria-label={t.tagListLabel}
         ondragover={handleTagDragOver}
         ondrop={() => (draggedTagIndex = null)}
       >
@@ -621,13 +753,13 @@
               draggable="true"
               ondragstart={(event) => handleTagDragStart(event, index)}
               ondragend={() => (draggedTagIndex = null)}
-              aria-label={`Kéo để đổi vị trí tag ${tag}`}
+              aria-label={`${t.dragTagLabel} ${tag}`}
             >
               <span>{tag}</span>
               <button
                 type="button"
                 class="tag-remove"
-                aria-label={`Xóa tag ${tag}`}
+                aria-label={`${t.removeTagLabel} ${tag}`}
                 onclick={(event) => {
                   event.stopPropagation()
                   removeTag(index)
@@ -638,19 +770,19 @@
             </div>
           {/each}
         {:else}
-          <p class="tag-empty">Chưa có tag nào. Tags sẽ nằm trong box này sau khi add.</p>
+          <p class="tag-empty">{t.emptyTags}</p>
         {/if}
       </div>
 
-      <label for="file-preview">Preview content</label>
+      <label for="file-preview">{t.previewContent}</label>
       <textarea id="file-preview" class="preview-box" readonly value={filePreview}></textarea>
 
       <div class="download-row">
         <div>
-          <label for="filename">Filename</label>
+          <label for="filename">{t.filename}</label>
           <input id="filename" type="text" value={filename} oninput={updateFilename} placeholder="example.txt" />
         </div>
-        <button type="button" onclick={downloadPreview} disabled={!filePreview}>Download</button>
+        <button type="button" onclick={downloadPreview} disabled={!filePreview}>{t.download}</button>
       </div>
     </section>
   </section>

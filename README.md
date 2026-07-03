@@ -1,50 +1,51 @@
 # OTP 2FA Web
 
-Ứng dụng web Svelte/Vite để tạo mã OTP 2FA, đọc QR code và tạo file nội dung từ danh sách tags.
+A Svelte/Vite web app for generating 2FA OTP codes, reading QR codes, and creating downloadable content files from tag lists.
 
-## Tính Năng
+## Features
 
-- Nhập nội dung `otpauth://` hoặc secret Base32 để tạo mã OTP 6 số.
-- Hỗ trợ TOTP theo thời gian và HOTP theo bộ đếm.
-- Với TOTP, mã OTP tự cập nhật theo chu kỳ 30 giây.
-- Với HOTP, có thể nhập bộ đếm hoặc tăng nhanh bộ đếm bằng nút `+1`.
-- Thanh thời gian giảm dần theo thời gian còn lại của mã hiện tại khi dùng TOTP.
-- Upload ảnh QR code để tự đọc nội dung.
-- Quét QR code bằng camera thiết bị.
-- Hiển thị key trích xuất và hỗ trợ copy key.
-- Hiển thị nhà cung cấp, tài khoản và hỗ trợ copy từng trường nếu URI có metadata.
-- Copy mã OTP hiện tại.
-- Thêm, xóa và kéo thả sắp xếp tags.
-- Preview nội dung tags theo định dạng `tag1|tag2|tag3`.
-- Tạo nhanh tags và filename từ nhà cung cấp, tài khoản, key trích xuất bằng nút `Generate content`.
-- Nhập filename và tải xuống file chứa nội dung preview.
-- Tự chuẩn hóa filename, ví dụ `otp|GoogleLogin|user@gmail.com.txt` thành `otp-GoogleLogin-user-gmail.com.txt`.
+- Enter an `otpauth://` URI or a Base32 secret to generate a 6-digit OTP code.
+- Supports time-based TOTP and counter-based HOTP.
+- TOTP codes update automatically on a 30-second period.
+- HOTP supports manual counter input or quick counter increments with the `+1` button.
+- Shows a countdown progress bar for the current TOTP period.
+- Upload a QR code image and decode its content locally.
+- Scan QR codes with the device camera.
+- Shows the extracted key and supports copying it.
+- Shows issuer and account metadata, with copy buttons for each field when available.
+- Copies the current OTP code.
+- Add, remove, and drag to reorder tags.
+- Preview tag content in the `tag1|tag2|tag3` format.
+- Generate tags and a filename from issuer, account, and extracted key with the `Generate content` button.
+- Enter a filename and download a file containing the preview content.
+- Sanitizes filenames automatically, for example `otp|GoogleLogin|user@gmail.com.txt` becomes `otp-GoogleLogin-user-gmail.com.txt`.
+- English is the default UI language, with an EN/VI switcher available in the interface.
 
-## Cài Đặt
+## Installation
 
 ```bash
 npm install
 ```
 
-## Chạy Development
+## Development
 
 ```bash
 npm run dev
 ```
 
-Sau đó mở URL Vite hiển thị trong terminal, thường là:
+Then open the Vite URL shown in the terminal, usually:
 
 ```text
 http://localhost:5173
 ```
 
-## Kiểm Tra
+## Check
 
 ```bash
 npm run check
 ```
 
-## Build Production
+## Production Build
 
 ```bash
 npm run build
@@ -56,47 +57,47 @@ npm run build
 npm run preview
 ```
 
-## Cách Dùng
+## Usage
 
-1. Dán secret Base32 hoặc URI `otpauth://` vào ô `Nội dung`.
-2. Hoặc chọn ảnh QR code bằng nút chọn ảnh.
-3. Hoặc bấm `Camera` để quét QR trực tiếp từ thiết bị.
-4. Chọn loại OTP: `Theo thời gian` cho TOTP hoặc `Theo bộ đếm` cho HOTP.
-5. Nếu dùng HOTP, nhập giá trị `Bộ đếm` hoặc bấm `+1` để tăng counter.
-6. Xem key trích xuất, nhà cung cấp, tài khoản và mã OTP hiện tại.
-7. Với phần tạo file, nhập tag rồi bấm `Add` hoặc nhấn `Enter`.
-8. Hoặc bấm `Generate content` để tự tạo tags theo thứ tự `Nhà cung cấp|Tài khoản|Key trích xuất`.
-9. Kéo thả tags để đổi thứ tự, nội dung preview sẽ tự cập nhật.
-10. Nhập tên file ở ô `Filename` và bấm `Download`.
+1. Paste a Base32 secret or an `otpauth://` URI into the `Content` field.
+2. Or choose a QR code image with the image picker.
+3. Or press `Camera` to scan a QR code directly from the device.
+4. Choose the OTP type: `Time-based` for TOTP or `Counter-based` for HOTP.
+5. If using HOTP, enter the `Counter` value or press `+1` to increment it.
+6. View the extracted key, issuer, account, and current OTP code.
+7. In the file builder, enter a tag and press `Add` or `Enter`.
+8. Or press `Generate content` to create tags in the order `Issuer|Account|Extracted key`.
+9. Drag tags to reorder them. The preview content updates automatically.
+10. Enter a filename in the `Filename` field and press `Download`.
 
 ## Generate Content
 
-Nút `Generate content` tự tạo nội dung tải xuống từ dữ liệu OTP đang có:
+The `Generate content` button creates downloadable content from the current OTP data:
 
-- Tag 1: `Nhà cung cấp` nếu có.
-- Tag 2: `Tài khoản` nếu có.
-- Tag 3: `Key trích xuất`.
+- Tag 1: `Issuer`, if available.
+- Tag 2: `Account`, if available.
+- Tag 3: `Extracted key`.
 
-Filename được tạo theo mẫu:
+The filename is generated with this pattern:
 
 ```text
-otp-tags[-nhà-cung-cấp][-tài-khoản].txt
+otp-tags[-issuer][-account].txt
 ```
 
-Ví dụ:
+Example:
 
 ```text
 otp-tags-Google-user-gmail.com.txt
 ```
 
-## Lưu Ý
+## Notes
 
-- Tất cả xử lý OTP, QR và tạo file chạy trên trình duyệt.
-- Secret/key không được gửi ra server.
-- Tính năng camera cần chạy trên `localhost` hoặc HTTPS để trình duyệt cho phép truy cập camera.
-- Web Crypto API cần môi trường browser hiện đại.
+- All OTP, QR, and file-generation processing runs in the browser.
+- Secrets and keys are not sent to a server.
+- Camera scanning requires `localhost` or HTTPS so the browser can grant camera access.
+- Web Crypto API requires a modern browser environment.
 
-## Công Nghệ
+## Technology
 
 - Svelte 5
 - Vite

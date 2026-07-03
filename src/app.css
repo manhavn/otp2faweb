@@ -123,7 +123,7 @@ code {
 
 .eyebrow {
   width: fit-content;
-  margin: 0 0 18px;
+  margin: 0;
   border: 1px solid rgba(125, 211, 252, 0.26);
   border-radius: 999px;
   padding: 8px 14px;
@@ -133,6 +133,37 @@ code {
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.hero-topline {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.language-switcher {
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid rgba(125, 211, 252, 0.26);
+  border-radius: 999px;
+  padding: 4px;
+  background: rgba(2, 6, 23, 0.42);
+}
+
+.language-switcher button {
+  min-width: 42px;
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: #93a4b8;
+  background: transparent;
+  font-size: 0.75rem;
+}
+
+.language-switcher button.active {
+  color: #03111d;
+  background: #7dd3fc;
 }
 
 h1 {
@@ -722,6 +753,11 @@ dd span {
   .panel {
     border-radius: 24px;
     padding: 24px;
+  }
+
+  .hero-topline {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .otp-card {
