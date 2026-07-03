@@ -9,6 +9,7 @@
   let error = $state('')
   let qrError = $state('')
   let qrPreview = $state('')
+  let scanning = $state(false)
   let copied = $state(false)
   let copiedKey = $state(false)
   let now = $state(Date.now())
@@ -16,6 +17,9 @@
   let tags = $state<string[]>([])
   let draggedTagIndex = $state<number | null>(null)
   let filename = $state('otp-tags.txt')
+  let videoElement = $state<HTMLVideoElement | null>(null)
+  let scanStream: MediaStream | null = null
+  let scanFrameId = 0
 
   const secondsRemaining = $derived(STEP_SECONDS - (Math.floor(now / 1000) % STEP_SECONDS))
   const progress = $derived((secondsRemaining / STEP_SECONDS) * 100)
@@ -29,6 +33,10 @@
     }, 1000)
 
     return () => window.clearInterval(timer)
+  })
+
+  $effect(() => {
+    return () => stopCameraScan()
   })
 
   $effect(() => {
@@ -175,6 +183,69 @@
     }
   }
 
+  async function startCameraScan() {
+    qrError = ''
+
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Trình duyệt không hỗ trợ camera scanner.')
+      }
+
+      stopCameraScan()
+      scanning = true
+      scanStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false,
+      })
+
+      if (!videoElement) throw new Error('Không thể khởi tạo camera preview.')
+
+      videoElement.srcObject = scanStream
+      await videoElement.play()
+      scanCameraFrame()
+    } catch (err) {
+      stopCameraScan()
+      qrError = err instanceof Error ? err.message : 'Không thể mở camera để quét QR.'
+    }
+  }
+
+  function stopCameraScan() {
+    if (scanFrameId) cancelAnimationFrame(scanFrameId)
+    scanFrameId = 0
+
+    scanStream?.getTracks().forEach((track) => track.stop())
+    scanStream = null
+    scanning = false
+
+    if (videoElement) videoElement.srcObject = null
+  }
+
+  function scanCameraFrame() {
+    if (!videoElement || !scanning) return
+
+    if (videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d', { willReadFrequently: true })
+
+      if (context) {
+        canvas.width = videoElement.videoWidth
+        canvas.height = videoElement.videoHeight
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
+
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        const result = jsQR(imageData.data, imageData.width, imageData.height)
+
+        if (result?.data) {
+          secretInput = result.data
+          stopCameraScan()
+          return
+        }
+      }
+    }
+
+    scanFrameId = requestAnimationFrame(scanCameraFrame)
+  }
+
   function addTag() {
     const newTags = tagInput
       .split(/[\n,]+/)
@@ -242,15 +313,25 @@
 
     <section class="qr-card" aria-label="Nhập ảnh QR code">
       <label for="qr-image">Ảnh QR code</label>
-      <div class="upload-box">
-        <input id="qr-image" type="file" accept="image/*" onchange={decodeQrImage} />
-        <div>
-          <strong>Chọn ảnh QR 2FA</strong>
-          <span>Hỗ trợ PNG, JPG, WebP hoặc ảnh chụp màn hình.</span>
+      <div class="qr-actions">
+        <div class="upload-box">
+          <input id="qr-image" type="file" accept="image/*" onchange={decodeQrImage} />
+          <div>
+            <strong>Chọn ảnh QR 2FA</strong>
+            <span>PNG, JPG, WebP hoặc ảnh chụp màn hình.</span>
+          </div>
         </div>
+        <button type="button" class="camera-button" onclick={scanning ? stopCameraScan : startCameraScan}>
+          {scanning ? 'Dừng' : 'Camera'}
+        </button>
       </div>
 
-      {#if qrPreview}
+      {#if scanning}
+        <div class="camera-preview">
+          <video bind:this={videoElement} playsinline muted aria-label="Camera quét QR"></video>
+          <span>Đưa QR vào khung camera</span>
+        </div>
+      {:else if qrPreview}
         <img class="qr-preview" src={qrPreview} alt="Ảnh QR đã chọn" />
       {:else}
         <div class="qr-placeholder" aria-hidden="true">QR</div>
@@ -263,13 +344,13 @@
   </aside>
 
   <section class="panel" aria-label="Tạo mã OTP">
-    <label for="secret">Khóa bí mật</label>
+    <label for="secret">Nội dung</label>
     <textarea
       id="secret"
       bind:value={secretInput}
       autocomplete="off"
       spellcheck="false"
-      placeholder="Ví dụ: JBSWY3DPEHPK3PXP hoặc otpauth://totp/..."
+      placeholder="Nhập nội dung bất kỳ, secret Base32 hoặc otpauth://totp/..."
     ></textarea>
 
     {#if error}
