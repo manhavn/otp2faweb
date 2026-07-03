@@ -309,11 +309,48 @@
     tags = nextTags
   }
 
-  function handleTagDrop(toIndex: number) {
+  function getTagDropIndex(event: DragEvent) {
+    const tagBox = event.currentTarget as HTMLElement
+    const target = event.target as HTMLElement
+    const hoveredTag = target.closest<HTMLElement>('.tag-chip')
+
+    if (!hoveredTag || !tagBox.contains(hoveredTag)) return tags.length
+
+    const tagElements = Array.from(tagBox.querySelectorAll<HTMLElement>('.tag-chip'))
+    const hoveredIndex = tagElements.indexOf(hoveredTag)
+
+    if (hoveredIndex === -1) return tags.length
+
+    const hoveredRect = hoveredTag.getBoundingClientRect()
+    const isAfterHoveredTag = event.clientY > hoveredRect.top + hoveredRect.height / 2
+
+    return hoveredIndex + (isAfterHoveredTag ? 1 : 0)
+  }
+
+  function handleTagDragStart(event: DragEvent, index: number) {
+    const draggedElement = event.currentTarget as HTMLElement
+    const draggedRect = draggedElement.getBoundingClientRect()
+
+    draggedTagIndex = index
+    event.dataTransfer?.setData('text/plain', tags[index])
+    event.dataTransfer?.setDragImage(
+      draggedElement,
+      event.clientX - draggedRect.left,
+      event.clientY - draggedRect.top,
+    )
+  }
+
+  function handleTagDragOver(event: DragEvent) {
+    event.preventDefault()
     if (draggedTagIndex === null) return
 
-    moveTag(draggedTagIndex, toIndex)
-    draggedTagIndex = null
+    const dropIndex = getTagDropIndex(event)
+    const nextIndex = dropIndex > draggedTagIndex ? dropIndex - 1 : dropIndex
+
+    if (nextIndex < 0 || nextIndex >= tags.length || nextIndex === draggedTagIndex) return
+
+    moveTag(draggedTagIndex, nextIndex)
+    draggedTagIndex = nextIndex
   }
 
   function generateContent() {
@@ -520,7 +557,13 @@
         </div>
       </div>
 
-      <div class="tag-box" role="list" aria-label="Danh sách tags có thể kéo thả">
+      <div
+        class="tag-box"
+        role="list"
+        aria-label="Danh sách tags có thể kéo thả"
+        ondragover={handleTagDragOver}
+        ondrop={() => (draggedTagIndex = null)}
+      >
         {#if tags.length > 0}
           {#each tags as tag, index}
             <div
@@ -528,9 +571,7 @@
               class="tag-chip"
               role="listitem"
               draggable="true"
-              ondragstart={() => (draggedTagIndex = index)}
-              ondragover={(event) => event.preventDefault()}
-              ondrop={() => handleTagDrop(index)}
+              ondragstart={(event) => handleTagDragStart(event, index)}
               ondragend={() => (draggedTagIndex = null)}
               aria-label={`Kéo để đổi vị trí tag ${tag}`}
             >

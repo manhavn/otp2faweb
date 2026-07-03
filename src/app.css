@@ -537,8 +537,7 @@ button:disabled {
   min-height: 112px;
   margin: 16px 0 18px;
   display: flex;
-  align-content: flex-start;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 20px;
@@ -546,11 +545,17 @@ button:disabled {
   background: rgba(2, 6, 23, 0.48);
 }
 
+.tag-box:has(.tag-chip.dragging) {
+  border-color: rgba(125, 211, 252, 0.46);
+  background: rgba(8, 47, 73, 0.34);
+}
+
 .tag-chip {
-  width: auto;
+  width: 100%;
   min-width: 0;
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   border: 1px solid rgba(125, 211, 252, 0.24);
   border-radius: 999px;
@@ -561,6 +566,16 @@ button:disabled {
   line-height: 1.2;
   overflow-wrap: anywhere;
   cursor: grab;
+  user-select: none;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    opacity 0.16s ease,
+    transform 0.16s ease;
+}
+
+.tag-chip span {
+  min-width: 0;
 }
 
 .tag-chip:active {
@@ -569,6 +584,7 @@ button:disabled {
 
 .tag-chip.dragging {
   opacity: 0.45;
+  transform: scale(0.96);
 }
 
 .tag-remove {
@@ -693,10 +709,6 @@ dd span {
 
   .mode-card {
     grid-template-columns: 1fr;
-  }
-
-  .tag-chip {
-    width: auto;
   }
 
   .key-card p {
