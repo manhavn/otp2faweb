@@ -12,11 +12,16 @@
   let copied = $state(false)
   let copiedKey = $state(false)
   let now = $state(Date.now())
+  let tagInput = $state('')
+  let tags = $state<string[]>([])
+  let draggedTagIndex = $state<number | null>(null)
+  let filename = $state('otp-tags.txt')
 
   const secondsRemaining = $derived(STEP_SECONDS - (Math.floor(now / 1000) % STEP_SECONDS))
   const progress = $derived((secondsRemaining / STEP_SECONDS) * 100)
   const parsedSecret = $derived(parseSecret(secretInput))
   const formattedCode = $derived(code === '------' ? code : `${code.slice(0, 3)} ${code.slice(3)}`)
+  const filePreview = $derived(tags.join('|'))
 
   $effect(() => {
     const timer = window.setInterval(() => {
@@ -169,6 +174,59 @@
       input.value = ''
     }
   }
+
+  function addTag() {
+    const newTags = tagInput
+      .split(/[\n,]+/)
+      .map((tag) => tag.trim())
+      .filter(Boolean)
+
+    if (newTags.length === 0) return
+
+    tags = [...tags, ...newTags]
+    tagInput = ''
+  }
+
+  function handleTagInputKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Enter') return
+
+    event.preventDefault()
+    addTag()
+  }
+
+  function removeTag(index: number) {
+    tags = tags.filter((_, tagIndex) => tagIndex !== index)
+  }
+
+  function moveTag(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) return
+
+    const nextTags = [...tags]
+    const [movedTag] = nextTags.splice(fromIndex, 1)
+    nextTags.splice(toIndex, 0, movedTag)
+    tags = nextTags
+  }
+
+  function handleTagDrop(toIndex: number) {
+    if (draggedTagIndex === null) return
+
+    moveTag(draggedTagIndex, toIndex)
+    draggedTagIndex = null
+  }
+
+  function downloadPreview() {
+    if (!filePreview) return
+
+    const safeName = filename.trim().replace(/^\.+/, '') || 'otp-tags.txt'
+    const blob = new Blob([filePreview], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    link.href = url
+    link.download = safeName
+    link.click()
+    URL.revokeObjectURL(url)
+  }
 </script>
 
 <main class="shell">
@@ -262,5 +320,70 @@
         {/if}
       </dl>
     {/if}
+
+    <section class="file-card" aria-labelledby="file-title">
+      <div class="section-heading">
+        <span class="muted">File builder</span>
+        <h2 id="file-title">Tạo file từ tags</h2>
+      </div>
+
+      <div class="tag-input-row">
+        <label for="tag-input">Thêm tag</label>
+        <div class="tag-controls">
+          <input
+            id="tag-input"
+            type="text"
+            bind:value={tagInput}
+            onkeydown={handleTagInputKeydown}
+            placeholder="Nhập tag rồi Enter hoặc bấm Add"
+          />
+          <button type="button" onclick={addTag}>Add</button>
+        </div>
+      </div>
+
+      <div class="tag-box" role="list" aria-label="Danh sách tags có thể kéo thả">
+        {#if tags.length > 0}
+          {#each tags as tag, index}
+            <div
+              class:dragging={draggedTagIndex === index}
+              class="tag-chip"
+              role="listitem"
+              draggable="true"
+              ondragstart={() => (draggedTagIndex = index)}
+              ondragover={(event) => event.preventDefault()}
+              ondrop={() => handleTagDrop(index)}
+              ondragend={() => (draggedTagIndex = null)}
+              aria-label={`Kéo để đổi vị trí tag ${tag}`}
+            >
+              <span>{tag}</span>
+              <button
+                type="button"
+                class="tag-remove"
+                aria-label={`Xóa tag ${tag}`}
+                onclick={(event) => {
+                  event.stopPropagation()
+                  removeTag(index)
+                }}
+              >
+                x
+              </button>
+            </div>
+          {/each}
+        {:else}
+          <p class="tag-empty">Chưa có tag nào. Tags sẽ nằm trong box này sau khi add.</p>
+        {/if}
+      </div>
+
+      <label for="file-preview">Preview content</label>
+      <textarea id="file-preview" class="preview-box" readonly value={filePreview}></textarea>
+
+      <div class="download-row">
+        <div>
+          <label for="filename">Filename</label>
+          <input id="filename" type="text" bind:value={filename} placeholder="example.txt" />
+        </div>
+        <button type="button" onclick={downloadPreview} disabled={!filePreview}>Download</button>
+      </div>
+    </section>
   </section>
 </main>

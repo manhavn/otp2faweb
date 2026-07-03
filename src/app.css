@@ -28,6 +28,28 @@ textarea {
   font: inherit;
 }
 
+input[type='text'] {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 16px;
+  padding: 13px 15px;
+  color: #eff6ff;
+  background: rgba(2, 6, 23, 0.72);
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+input[type='text']:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
+input[type='text']::placeholder {
+  color: #64748b;
+}
+
 button {
   border: 0;
 }
@@ -351,6 +373,112 @@ button:disabled {
   background: rgba(15, 23, 42, 0.72);
 }
 
+.file-card {
+  margin-top: 26px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 24px;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.58);
+}
+
+.section-heading {
+  margin-bottom: 18px;
+}
+
+.section-heading h2 {
+  margin: 4px 0 0;
+  color: #f8fafc;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.tag-input-row label,
+.download-row label {
+  margin-top: 0;
+}
+
+.tag-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.tag-box {
+  min-height: 112px;
+  margin: 16px 0 18px;
+  display: flex;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 20px;
+  padding: 14px;
+  background: rgba(2, 6, 23, 0.48);
+}
+
+.tag-chip {
+  width: auto;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: 999px;
+  padding: 8px 10px 8px 13px;
+  color: #dbeafe;
+  background: rgba(14, 165, 233, 0.14);
+  font-size: 0.94rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  cursor: grab;
+}
+
+.tag-chip:active {
+  cursor: grabbing;
+}
+
+.tag-chip.dragging {
+  opacity: 0.45;
+}
+
+.tag-remove {
+  display: grid;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  color: #07111f;
+  background: #7dd3fc;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tag-empty {
+  margin: auto;
+  color: #64748b;
+  text-align: center;
+}
+
+.preview-box {
+  min-height: 92px;
+  color: #bfdbfe;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+
+.download-row {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
 dt {
   color: #93a4b8;
   font-size: 0.78rem;
@@ -402,6 +530,15 @@ dd {
   .key-card {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .tag-controls,
+  .download-row {
+    grid-template-columns: 1fr;
+  }
+
+  .tag-chip {
+    width: auto;
   }
 
   .key-card p {
