@@ -504,6 +504,10 @@ button:disabled {
 
 .section-heading {
   margin-bottom: 18px;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
 }
 
 .section-heading h2 {
@@ -511,6 +515,11 @@ button:disabled {
   color: #f8fafc;
   font-size: 1.35rem;
   line-height: 1.2;
+}
+
+.generate-button {
+  min-width: 150px;
+  padding: 11px 14px;
 }
 
 .tag-input-row label,
@@ -666,6 +675,11 @@ dd span {
   }
 
   .key-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .section-heading {
     align-items: stretch;
     flex-direction: column;
   }

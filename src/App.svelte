@@ -316,6 +316,14 @@
     draggedTagIndex = null
   }
 
+  function generateContent() {
+    const nextTags = [parsedSecret.issuer, parsedSecret.account, parsedSecret.secret].filter(Boolean)
+    const filenameParts = ['otp-tags', parsedSecret.issuer, parsedSecret.account].filter(Boolean)
+
+    tags = nextTags
+    filename = `${sanitizeFilename(filenameParts.join('-')) || 'otp-tags'}.txt`
+  }
+
   function downloadPreview() {
     if (!filePreview) return
 
@@ -489,8 +497,13 @@
 
     <section class="file-card" aria-labelledby="file-title">
       <div class="section-heading">
-        <span class="muted">File builder</span>
-        <h2 id="file-title">Tạo file từ tags</h2>
+        <div>
+          <span class="muted">File builder</span>
+          <h2 id="file-title">Tạo file từ tags</h2>
+        </div>
+        <button type="button" class="generate-button" onclick={generateContent} disabled={!parsedSecret.secret}>
+          Generate content
+        </button>
       </div>
 
       <div class="tag-input-row">
