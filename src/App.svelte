@@ -30,6 +30,7 @@
   const parsedSecret = $derived(parseSecret(secretInput))
   const formattedCode = $derived(code === '------' ? code : `${code.slice(0, 3)} ${code.slice(3)}`)
   const filePreview = $derived(tags.join('|'))
+  const base32Pattern = /^[A-Z2-7]+=*$/
 
   $effect(() => {
     const timer = window.setInterval(() => {
@@ -60,21 +61,49 @@
 
     if (!trimmed) return { secret: '', issuer: '', account: '' }
 
-    if (!trimmed.toLowerCase().startsWith('otpauth://')) {
-      return { secret: trimmed.replace(/\s|-/g, '').toUpperCase(), issuer: '', account: '' }
+    const uriStart = trimmed.toLowerCase().indexOf('otpauth://')
+
+    if (uriStart !== -1) {
+      const uriText = trimmed.slice(uriStart).split(/\s+/)[0]
+
+      try {
+        const uri = new URL(uriText)
+        const label = decodeURIComponent(uri.pathname.replace(/^\//, ''))
+        return {
+          secret: normalizeBase32(uri.searchParams.get('secret') ?? ''),
+          issuer: uri.searchParams.get('issuer') ?? '',
+          account: label.includes(':') ? label.split(':').slice(1).join(':') : label,
+        }
+      } catch {
+        return { secret: '', issuer: '', account: '' }
+      }
     }
 
-    try {
-      const uri = new URL(trimmed)
-      const label = decodeURIComponent(uri.pathname.replace(/^\//, ''))
+    const tagParts = trimmed.split('|').map((tag) => tag.trim()).filter(Boolean)
+    const secretFromTags = [...tagParts].reverse().find((tag) => isBase32Secret(normalizeBase32(tag)))
+
+    if (secretFromTags) {
       return {
-        secret: (uri.searchParams.get('secret') ?? '').replace(/\s|-/g, '').toUpperCase(),
-        issuer: uri.searchParams.get('issuer') ?? '',
-        account: label.includes(':') ? label.split(':').slice(1).join(':') : label,
+        secret: normalizeBase32(secretFromTags),
+        issuer: tagParts.length > 1 ? tagParts[0] : '',
+        account: tagParts.length > 2 ? tagParts[1] : '',
       }
-    } catch {
-      return { secret: '', issuer: '', account: '' }
     }
+
+    return { secret: extractBase32Secret(trimmed), issuer: '', account: '' }
+  }
+
+  function normalizeBase32(value: string) {
+    return value.replace(/[\s-]/g, '').toUpperCase()
+  }
+
+  function isBase32Secret(value: string) {
+    return value.length >= 16 && base32Pattern.test(value)
+  }
+
+  function extractBase32Secret(value: string) {
+    const candidates = value.match(/[A-Z2-7][A-Z2-7\s=-]{14,}[A-Z2-7=]/gi) ?? []
+    return candidates.map(normalizeBase32).filter(isBase32Secret).sort((a, b) => b.length - a.length)[0] ?? ''
   }
 
   function base32ToBytes(base32: string) {
@@ -209,6 +238,21 @@
       secretInput = result.data
     } catch (err) {
       qrError = err instanceof Error ? err.message : 'Không thể đọc mã QR từ ảnh này.'
+    } finally {
+      input.value = ''
+    }
+  }
+
+  async function openSecretFile(event: Event) {
+    const input = event.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+
+    if (!file) return
+
+    try {
+      secretInput = await file.text()
+    } catch {
+      error = 'Không thể mở file này.'
     } finally {
       input.value = ''
     }
@@ -428,7 +472,11 @@
   </aside>
 
   <section class="panel" aria-label="Tạo mã OTP">
-    <label for="secret">Nội dung</label>
+    <div class="secret-heading">
+      <label for="secret">Nội dung</label>
+      <label class="open-file-button" for="secret-file">Load content</label>
+      <input id="secret-file" class="visually-hidden" type="file" accept=".txt,text/plain" onchange={openSecretFile} />
+    </div>
     <textarea
       id="secret"
       bind:value={secretInput}

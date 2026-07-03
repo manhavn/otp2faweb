@@ -76,6 +76,15 @@ code {
   background: rgba(59, 130, 246, 0.18);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 #app {
   min-height: 100vh;
 }
@@ -317,6 +326,36 @@ textarea:focus {
 
 textarea::placeholder {
   color: #64748b;
+}
+
+.secret-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.secret-heading label {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.open-file-button {
+  min-width: 82px;
+  border-radius: 14px;
+  padding: 10px 14px;
+  color: #03111d;
+  background: #7dd3fc;
+  font-weight: 900;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.open-file-button:hover {
+  transform: translateY(-1px);
 }
 
 .error {
