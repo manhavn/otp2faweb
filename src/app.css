@@ -107,6 +107,11 @@ code {
   gap: 20px;
 }
 
+.main-column {
+  display: grid;
+  gap: 22px;
+}
+
 .hero-card,
 .qr-card {
   padding: 38px;
@@ -118,7 +123,13 @@ code {
 }
 
 .qr-card {
+  display: grid;
+  gap: 18px;
   padding: 28px;
+}
+
+.qr-card > label {
+  margin-bottom: -8px;
 }
 
 .eyebrow {
@@ -183,9 +194,16 @@ h1 {
   line-height: 1.75;
 }
 
-.source-link {
-  width: fit-content;
+.hero-actions {
   margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.source-link,
+.reset-button {
+  width: fit-content;
   display: inline-flex;
   align-items: center;
   border: 1px solid rgba(125, 211, 252, 0.32);
@@ -202,13 +220,21 @@ h1 {
     transform 0.2s ease;
 }
 
-.source-link:hover {
+.reset-button {
+  min-width: 0;
+  color: #dbeafe;
+  background: rgba(15, 23, 42, 0.56);
+}
+
+.source-link:hover,
+.reset-button:hover:not(:disabled) {
   border-color: rgba(125, 211, 252, 0.62);
   color: #eff6ff;
   transform: translateY(-1px);
 }
 
-.panel {
+.panel,
+.file-card {
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 30px;
   padding: 34px;
@@ -285,9 +311,10 @@ label:not(:first-child) {
 
 .qr-preview {
   display: block;
-  width: min(100%, 260px);
+  width: 100%;
+  max-width: 340px;
   aspect-ratio: 1;
-  margin: 18px auto 0;
+  margin: 0 auto;
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 24px;
   object-fit: cover;
@@ -296,9 +323,10 @@ label:not(:first-child) {
 
 .qr-placeholder {
   display: grid;
-  width: min(100%, 260px);
+  width: 100%;
+  max-width: 340px;
   aspect-ratio: 1;
-  margin: 18px auto 0;
+  margin: 0 auto;
   place-items: center;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 24px;
@@ -320,9 +348,10 @@ label:not(:first-child) {
 .camera-preview {
   position: relative;
   overflow: hidden;
-  width: min(100%, 320px);
+  width: 100%;
+  max-width: 340px;
   aspect-ratio: 1;
-  margin: 18px auto 0;
+  margin: 0 auto;
   border: 1px solid rgba(125, 211, 252, 0.28);
   border-radius: 24px;
   background: #020617;
@@ -433,7 +462,7 @@ textarea::placeholder {
 
 .mode-card legend {
   grid-column: 1 / -1;
-  margin-bottom: 0;
+  margin-bottom: 6px;
   color: #dbeafe;
   font-weight: 800;
 }
@@ -590,10 +619,7 @@ button:disabled {
 }
 
 .file-card {
-  margin-top: 26px;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 24px;
-  padding: 24px;
   background: rgba(15, 23, 42, 0.58);
 }
 
@@ -757,7 +783,8 @@ dd span {
 
   .hero-card,
   .qr-card,
-  .panel {
+  .panel,
+  .file-card {
     padding: 28px;
   }
 }
@@ -775,7 +802,8 @@ dd span {
 
   .hero-card,
   .qr-card,
-  .panel {
+  .panel,
+  .file-card {
     border-radius: 24px;
     padding: 24px;
   }

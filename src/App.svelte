@@ -49,6 +49,7 @@
       currentCounter: 'Current counter',
       issuer: 'Issuer',
       account: 'Account',
+      resetForm: 'Reset form',
       fileBuilder: 'File builder',
       fileTitle: 'Create a file from tags',
       generateContent: 'Generate content',
@@ -108,6 +109,7 @@
       currentCounter: 'Bộ đếm hiện tại',
       issuer: 'Nhà cung cấp',
       account: 'Tài khoản',
+      resetForm: 'Reset form',
       fileBuilder: 'File builder',
       fileTitle: 'Tạo file từ tags',
       generateContent: 'Generate content',
@@ -332,6 +334,28 @@
   function updateHotpCounter(event: Event) {
     const value = Number((event.currentTarget as HTMLInputElement).value)
     hotpCounter = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0
+  }
+
+  function resetForm() {
+    stopCameraScan()
+    if (qrPreview) URL.revokeObjectURL(qrPreview)
+
+    secretInput = ''
+    code = '------'
+    error = ''
+    qrError = ''
+    qrPreview = ''
+    copied = false
+    copiedKey = false
+    copiedIssuer = false
+    copiedAccount = false
+    now = Date.now()
+    otpMode = 'totp'
+    hotpCounter = 0
+    tagInput = ''
+    tags = []
+    draggedTagIndex = null
+    filename = 'otp-tags.txt'
   }
 
   async function decodeQrImage(event: Event) {
@@ -601,9 +625,12 @@
       <p class="intro">
         {t.intro}
       </p>
-      <a class="source-link" href="https://github.com/manhavn/otp2faweb" target="_blank" rel="noreferrer">
-        {t.sourceCode}
-      </a>
+      <div class="hero-actions">
+        <a class="source-link" href="https://github.com/manhavn/otp2faweb" target="_blank" rel="noreferrer">
+          {t.sourceCode}
+        </a>
+        <button type="button" class="reset-button" onclick={resetForm}>{t.resetForm}</button>
+      </div>
     </section>
 
     <section class="qr-card" aria-label={t.qrSectionLabel}>
@@ -638,114 +665,116 @@
     </section>
   </aside>
 
-  <section class="panel" aria-label={t.otpPanelLabel}>
-    <div class="secret-heading">
-      <label for="secret">{t.content}</label>
-      <label class="open-file-button" for="secret-file">{t.loadContent}</label>
-      <input id="secret-file" class="visually-hidden" type="file" accept=".txt,text/plain" onchange={openSecretFile} />
-    </div>
-    <textarea
-      id="secret"
-      bind:value={secretInput}
-      autocomplete="off"
-      spellcheck="false"
-      placeholder={t.contentPlaceholder}
-    ></textarea>
+  <div class="main-column">
+    <section class="panel" aria-label={t.otpPanelLabel}>
+      <div class="secret-heading">
+        <label for="secret">{t.content}</label>
+        <label class="open-file-button" for="secret-file">{t.loadContent}</label>
+        <input id="secret-file" class="visually-hidden" type="file" accept=".txt,text/plain" onchange={openSecretFile} />
+      </div>
+      <textarea
+        id="secret"
+        bind:value={secretInput}
+        autocomplete="off"
+        spellcheck="false"
+        placeholder={t.contentPlaceholder}
+      ></textarea>
 
-    {#if error}
-      <p class="error">{error}</p>
-    {/if}
+      {#if error}
+        <p class="error">{error}</p>
+      {/if}
 
-    <fieldset class="mode-card">
-      <legend>{t.otpType}</legend>
-      <label class:active={otpMode === 'totp'}>
-        <input type="radio" name="otp-mode" value="totp" bind:group={otpMode} />
-        <span>{t.timeBased}</span>
-      </label>
-      <label class:active={otpMode === 'hotp'}>
-        <input type="radio" name="otp-mode" value="hotp" bind:group={otpMode} />
-        <span>{t.counterBased}</span>
-      </label>
-    </fieldset>
+      <fieldset class="mode-card">
+        <legend>{t.otpType}</legend>
+        <label class:active={otpMode === 'totp'}>
+          <input type="radio" name="otp-mode" value="totp" bind:group={otpMode} />
+          <span>{t.timeBased}</span>
+        </label>
+        <label class:active={otpMode === 'hotp'}>
+          <input type="radio" name="otp-mode" value="hotp" bind:group={otpMode} />
+          <span>{t.counterBased}</span>
+        </label>
+      </fieldset>
 
-    {#if otpMode === 'hotp'}
-      <div class="counter-row">
-        <label for="hotp-counter">{t.counter}</label>
-        <div>
-          <input
-            id="hotp-counter"
-            type="number"
-            min="0"
-            step="1"
-            value={hotpCounter}
-            oninput={updateHotpCounter}
-          />
-          <button type="button" onclick={() => (hotpCounter += 1)}>+1</button>
+      {#if otpMode === 'hotp'}
+        <div class="counter-row">
+          <label for="hotp-counter">{t.counter}</label>
+          <div>
+            <input
+              id="hotp-counter"
+              type="number"
+              min="0"
+              step="1"
+              value={hotpCounter}
+              oninput={updateHotpCounter}
+            />
+            <button type="button" onclick={() => (hotpCounter += 1)}>+1</button>
+          </div>
         </div>
-      </div>
-    {/if}
+      {/if}
 
-    <div class="key-card">
-      <div>
-        <span class="muted">{t.extractedKey}</span>
-        <p>{parsedSecret.secret || t.noKey}</p>
+      <div class="key-card">
+        <div>
+          <span class="muted">{t.extractedKey}</span>
+          <p>{parsedSecret.secret || t.noKey}</p>
+        </div>
+        <button type="button" onclick={copyKey} disabled={!parsedSecret.secret}>
+          {copiedKey ? t.copied : t.copyKey}
+        </button>
       </div>
-      <button type="button" onclick={copyKey} disabled={!parsedSecret.secret}>
-        {copiedKey ? t.copied : t.copyKey}
-      </button>
-    </div>
 
-    <div class="otp-card">
-      <div>
-        <span class="muted">{t.currentCode}</span>
-        <p class="otp-code" aria-live="polite">{formattedCode}</p>
+      <div class="otp-card">
+        <div>
+          <span class="muted">{t.currentCode}</span>
+          <p class="otp-code" aria-live="polite">{formattedCode}</p>
+        </div>
+        <button type="button" onclick={copyCode} disabled={code === '------'}>
+          {copied ? t.copied : t.copy}
+        </button>
       </div>
-      <button type="button" onclick={copyCode} disabled={code === '------'}>
-        {copied ? t.copied : t.copy}
-      </button>
-    </div>
 
-    {#if otpMode === 'totp'}
-      <div class="time-row">
-        <span>{t.remaining} {secondsRemaining}s</span>
-        <span>{STEP_SECONDS}s / {t.period}</span>
-      </div>
-      <div class="progress" aria-hidden="true">
-        <span style={`width: ${progress}%`}></span>
-      </div>
-    {:else}
-      <div class="time-row">
-        <span>{t.currentCounter}</span>
-        <span>{hotpCounter}</span>
-      </div>
-    {/if}
+      {#if otpMode === 'totp'}
+        <div class="time-row">
+          <span>{t.remaining} {secondsRemaining}s</span>
+          <span>{STEP_SECONDS}s / {t.period}</span>
+        </div>
+        <div class="progress" aria-hidden="true">
+          <span style={`width: ${progress}%`}></span>
+        </div>
+      {:else}
+        <div class="time-row">
+          <span>{t.currentCounter}</span>
+          <span>{hotpCounter}</span>
+        </div>
+      {/if}
 
-    {#if parsedSecret.issuer || parsedSecret.account}
-      <dl class="meta">
-        {#if parsedSecret.issuer}
-          <div>
-            <dt>{t.issuer}</dt>
-            <dd>
-              <span>{parsedSecret.issuer}</span>
-              <button type="button" class="meta-copy" onclick={copyIssuer}>
-                {copiedIssuer ? t.copied : t.copy}
-              </button>
-            </dd>
-          </div>
-        {/if}
-        {#if parsedSecret.account}
-          <div>
-            <dt>{t.account}</dt>
-            <dd>
-              <span>{parsedSecret.account}</span>
-              <button type="button" class="meta-copy" onclick={copyAccount}>
-                {copiedAccount ? t.copied : t.copy}
-              </button>
-            </dd>
-          </div>
-        {/if}
-      </dl>
-    {/if}
+      {#if parsedSecret.issuer || parsedSecret.account}
+        <dl class="meta">
+          {#if parsedSecret.issuer}
+            <div>
+              <dt>{t.issuer}</dt>
+              <dd>
+                <span>{parsedSecret.issuer}</span>
+                <button type="button" class="meta-copy" onclick={copyIssuer}>
+                  {copiedIssuer ? t.copied : t.copy}
+                </button>
+              </dd>
+            </div>
+          {/if}
+          {#if parsedSecret.account}
+            <div>
+              <dt>{t.account}</dt>
+              <dd>
+                <span>{parsedSecret.account}</span>
+                <button type="button" class="meta-copy" onclick={copyAccount}>
+                  {copiedAccount ? t.copied : t.copy}
+                </button>
+              </dd>
+            </div>
+          {/if}
+        </dl>
+      {/if}
+    </section>
 
     <section class="file-card" aria-labelledby="file-title">
       <div class="section-heading">
@@ -820,5 +849,5 @@
         <button type="button" onclick={downloadPreview} disabled={!filePreview}>{t.download}</button>
       </div>
     </section>
-  </section>
+  </div>
 </main>
