@@ -205,7 +205,7 @@
     }
 
     const tagParts = trimmed.split('|').map((tag) => tag.trim()).filter(Boolean)
-    const secretFromTags = [...tagParts].reverse().find((tag) => isBase32Secret(normalizeBase32(tag)))
+    const secretFromTags = [...tagParts].reverse().map(extractBase32Secret).find(Boolean)
 
     if (secretFromTags) {
       return {
@@ -227,7 +227,7 @@
   }
 
   function extractBase32Secret(value: string) {
-    const candidates = value.match(/[A-Z2-7][A-Z2-7\s=-]{14,}[A-Z2-7=]/gi) ?? []
+    const candidates = value.match(/[A-Z2-7][A-Z2-7=-]{14,}[A-Z2-7=]/gi) ?? []
     return candidates.map(normalizeBase32).filter(isBase32Secret).sort((a, b) => b.length - a.length)[0] ?? ''
   }
 
