@@ -3,6 +3,7 @@
 
   const STEP_SECONDS = 30
   const DIGITS = 6
+  const QR_QUIET_ZONE = 32
   const translations = {
     en: {
       invalidBase32: 'Secret can only contain Base32 characters A-Z and 2-7.',
@@ -23,7 +24,7 @@
       qrSectionLabel: 'QR code image input',
       qrImage: 'QR code image',
       chooseQr: 'Choose a 2FA QR image',
-      qrFormats: 'PNG, JPG, WebP, or a screenshot.',
+      qrFormats: 'SVG, PNG, JPG, BMP, WebP, GIF, or a screenshot.',
       stop: 'Stop',
       camera: 'Camera',
       cameraVideoLabel: 'QR scanning camera',
@@ -82,7 +83,7 @@
       qrSectionLabel: 'Nhập ảnh QR code',
       qrImage: 'Ảnh QR code',
       chooseQr: 'Chọn ảnh QR 2FA',
-      qrFormats: 'PNG, JPG, WebP hoặc ảnh chụp màn hình.',
+      qrFormats: 'SVG, PNG, JPG, BMP, WebP, GIF hoặc ảnh chụp màn hình.',
       stop: 'Dừng',
       camera: 'Camera',
       cameraVideoLabel: 'Camera quét QR',
@@ -344,16 +345,21 @@
     qrPreview = URL.createObjectURL(file)
 
     try {
-      const bitmap = await createImageBitmap(file)
       const canvas = document.createElement('canvas')
       const context = canvas.getContext('2d', { willReadFrequently: true })
 
       if (!context) throw new Error(t.qrUnsupported)
 
-      canvas.width = bitmap.width
-      canvas.height = bitmap.height
-      context.drawImage(bitmap, 0, 0)
-      bitmap.close()
+      try {
+        const bitmap = await createImageBitmap(file)
+
+        drawQrSource(context, canvas, bitmap, bitmap.width, bitmap.height)
+        bitmap.close()
+      } catch {
+        const image = await loadQrImage(qrPreview)
+
+        drawQrSource(context, canvas, image, image.naturalWidth, image.naturalHeight)
+      }
 
       const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
       const result = jsQR(imageData.data, imageData.width, imageData.height)
@@ -366,6 +372,30 @@
     } finally {
       input.value = ''
     }
+  }
+
+  function drawQrSource(
+    context: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    source: CanvasImageSource,
+    width: number,
+    height: number,
+  ) {
+    canvas.width = width + QR_QUIET_ZONE * 2
+    canvas.height = height + QR_QUIET_ZONE * 2
+    context.fillStyle = '#fff'
+    context.fillRect(0, 0, canvas.width, canvas.height)
+    context.drawImage(source, QR_QUIET_ZONE, QR_QUIET_ZONE, width, height)
+  }
+
+  function loadQrImage(source: string) {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image()
+
+      image.onload = () => resolve(image)
+      image.onerror = () => reject(new Error(t.qrReadError))
+      image.src = source
+    })
   }
 
   async function openSecretFile(event: Event) {
@@ -580,7 +610,7 @@
       <label for="qr-image">{t.qrImage}</label>
       <div class="qr-actions">
         <div class="upload-box">
-          <input id="qr-image" type="file" accept="image/*" onchange={decodeQrImage} />
+          <input id="qr-image" type="file" accept="image/*,.svg,.jpg,.jpeg,.png,.bmp,.webp,.gif,.avif,.ico,.tif,.tiff" onchange={decodeQrImage} />
           <div>
             <strong>{t.chooseQr}</strong>
             <span>{t.qrFormats}</span>
