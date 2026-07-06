@@ -1,5 +1,6 @@
 <script lang="ts">
   import jsQR from 'jsqr'
+  import qrcode from 'qrcode-generator'
 
   const STEP_SECONDS = 30
   const DIGITS = 6
@@ -42,6 +43,12 @@
       noKey: 'No key yet',
       copied: 'Copied',
       copyKey: 'Copy key',
+      generatedOtpAuth: 'Generated otpauth content',
+      generatedOtpAuthHint: 'Edit Issuer and Account to build a new otpauth:// URI from the current OTP type and extracted key.',
+      copyGeneratedContent: 'Copy new content',
+      downloadTxt: 'Download TXT',
+      downloadQrSvg: 'Download QR SVG',
+      downloadQrPng: 'Download QR PNG',
       currentCode: 'Current code',
       copy: 'Copy',
       remaining: 'Remaining',
@@ -102,6 +109,12 @@
       noKey: 'Chưa có key',
       copied: 'Đã copy',
       copyKey: 'Copy key',
+      generatedOtpAuth: 'Nội dung otpauth mới',
+      generatedOtpAuthHint: 'Sửa Nhà cung cấp và Tài khoản để tạo URI otpauth:// mới từ loại OTP và key trích xuất hiện tại.',
+      copyGeneratedContent: 'Copy nội dung mới',
+      downloadTxt: 'Tải TXT',
+      downloadQrSvg: 'Tải QR SVG',
+      downloadQrPng: 'Tải QR PNG',
       currentCode: 'Mã hiện tại',
       copy: 'Copy',
       remaining: 'Còn',
@@ -137,11 +150,12 @@
   let scanning = $state(false)
   let copied = $state(false)
   let copiedKey = $state(false)
-  let copiedIssuer = $state(false)
-  let copiedAccount = $state(false)
+  let copiedGeneratedContent = $state(false)
   let now = $state(Date.now())
   let otpMode = $state<'totp' | 'hotp'>('totp')
   let hotpCounter = $state(0)
+  let editableIssuer = $state('')
+  let editableAccount = $state('')
   let tagInput = $state('')
   let tags = $state<string[]>([])
   let draggedTagIndex = $state<number | null>(null)
@@ -155,6 +169,8 @@
   const progress = $derived((secondsRemaining / STEP_SECONDS) * 100)
   const parsedSecret = $derived(parseSecret(secretInput))
   const formattedCode = $derived(code === '------' ? code : `${code.slice(0, 3)} ${code.slice(3)}`)
+  const generatedOtpAuthContent = $derived(buildOtpAuthUri())
+  const generatedContentBaseName = $derived(getGeneratedContentBaseName())
   const filePreview = $derived(tags.join('|'))
   const t = $derived(translations[language])
   const base32Pattern = /^[A-Z2-7]+=*$/
@@ -173,14 +189,21 @@
 
   $effect(() => {
     secretInput
+    editableIssuer = parsedSecret.issuer
+    editableAccount = parsedSecret.account
+  })
+
+  $effect(() => {
+    secretInput
+    editableIssuer
+    editableAccount
     otpMode
     hotpCounter
     now
     language
     copied = false
     copiedKey = false
-    copiedIssuer = false
-    copiedAccount = false
+    copiedGeneratedContent = false
     void generateCode()
   })
 
@@ -317,20 +340,6 @@
     copiedKey = true
   }
 
-  async function copyIssuer() {
-    if (!parsedSecret.issuer) return
-
-    await navigator.clipboard.writeText(parsedSecret.issuer)
-    copiedIssuer = true
-  }
-
-  async function copyAccount() {
-    if (!parsedSecret.account) return
-
-    await navigator.clipboard.writeText(parsedSecret.account)
-    copiedAccount = true
-  }
-
   function updateHotpCounter(event: Event) {
     const value = Number((event.currentTarget as HTMLInputElement).value)
     hotpCounter = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0
@@ -347,11 +356,12 @@
     qrPreview = ''
     copied = false
     copiedKey = false
-    copiedIssuer = false
-    copiedAccount = false
+    copiedGeneratedContent = false
     now = Date.now()
     otpMode = 'totp'
     hotpCounter = 0
+    editableIssuer = ''
+    editableAccount = ''
     tagInput = ''
     tags = []
     draggedTagIndex = null
@@ -366,7 +376,8 @@
     if (!file) return
 
     if (qrPreview) URL.revokeObjectURL(qrPreview)
-    qrPreview = URL.createObjectURL(file)
+    const imageFile = await normalizeQrImageFile(file)
+    qrPreview = URL.createObjectURL(imageFile)
 
     try {
       const canvas = document.createElement('canvas')
@@ -375,6 +386,8 @@
       if (!context) throw new Error(t.qrUnsupported)
 
       try {
+        if (isSvgFile(file)) throw new Error(t.qrUnsupported)
+
         const bitmap = await createImageBitmap(file)
 
         drawQrSource(context, canvas, bitmap, bitmap.width, bitmap.height)
@@ -396,6 +409,25 @@
     } finally {
       input.value = ''
     }
+  }
+
+  async function normalizeQrImageFile(file: File) {
+    if (!isSvgFile(file)) return file
+
+    const svgText = await file.text()
+    const viewBox = svgText.match(/viewBox=["']\s*[-\d.]+\s+[-\d.]+\s+([\d.]+)\s+([\d.]+)\s*["']/i)
+
+    if (!viewBox || /<svg\b[^>]*\swidth=/i.test(svgText) || /<svg\b[^>]*\sheight=/i.test(svgText)) return file
+
+    const size = Math.max(Number(viewBox[1]), Number(viewBox[2]))
+    if (!Number.isFinite(size) || size <= 0) return file
+
+    const normalizedSvg = svgText.replace(/<svg\b/i, `<svg width="${size}px" height="${size}px"`)
+    return new File([normalizedSvg], file.name, { type: 'image/svg+xml' })
+  }
+
+  function isSvgFile(file: File) {
+    return file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')
   }
 
   function drawQrSource(
@@ -577,8 +609,8 @@
   }
 
   function generateContent() {
-    const nextTags = [parsedSecret.issuer, parsedSecret.account, parsedSecret.secret].filter(Boolean)
-    const filenameParts = ['otp-tags', parsedSecret.issuer, parsedSecret.account].filter(Boolean)
+    const nextTags = [editableIssuer, editableAccount, parsedSecret.secret].map((part) => part.trim()).filter(Boolean)
+    const filenameParts = ['otp-tags', editableIssuer, editableAccount].map((part) => part.trim()).filter(Boolean)
 
     tags = nextTags
     filename = `${sanitizeFilename(filenameParts.join('-')) || 'otp-tags'}.txt`
@@ -594,6 +626,95 @@
 
     link.href = url
     link.download = safeName
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function copyGeneratedOtpAuthContent() {
+    if (!generatedOtpAuthContent) return
+
+    await navigator.clipboard.writeText(generatedOtpAuthContent)
+    copiedGeneratedContent = true
+  }
+
+  function downloadGeneratedOtpAuthText() {
+    if (!generatedOtpAuthContent) return
+
+    downloadBlob(generatedOtpAuthContent, `${generatedContentBaseName}.txt`, 'text/plain;charset=utf-8')
+  }
+
+  function downloadGeneratedOtpAuthQrSvg() {
+    if (!generatedOtpAuthContent) return
+
+    const qr = createGeneratedOtpAuthQr()
+    const svg = qr.createSvgTag({ cellSize: 8, margin: 4 })
+    downloadBlob(svg, `${generatedContentBaseName}.svg`, 'image/svg+xml;charset=utf-8')
+  }
+
+  async function downloadGeneratedOtpAuthQrPng() {
+    if (!generatedOtpAuthContent) return
+
+    const cellSize = 8
+    const margin = cellSize * 4
+    const qr = createGeneratedOtpAuthQr()
+    const size = qr.getModuleCount() * cellSize + margin * 2
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+
+    if (!context) return
+
+    canvas.width = size
+    canvas.height = size
+    context.fillStyle = '#fff'
+    context.fillRect(0, 0, size, size)
+    context.translate(margin, margin)
+    qr.renderTo2dContext(context, cellSize)
+
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
+    if (!blob) return
+
+    downloadBlob(blob, `${generatedContentBaseName}.png`, 'image/png')
+  }
+
+  function createGeneratedOtpAuthQr() {
+    const qr = qrcode(0, 'M')
+    qr.addData(generatedOtpAuthContent)
+    qr.make()
+    return qr
+  }
+
+  function buildOtpAuthUri() {
+    const secret = parsedSecret.secret
+    if (!secret) return ''
+
+    const issuer = editableIssuer.trim()
+    const account = editableAccount.trim()
+    const labelParts = [issuer, account].filter(Boolean).map(encodeURIComponent)
+    const params = new URLSearchParams({ secret, digits: String(DIGITS) })
+
+    if (issuer) params.set('issuer', issuer)
+
+    if (otpMode === 'totp') {
+      params.set('period', String(STEP_SECONDS))
+    } else {
+      params.set('counter', String(hotpCounter))
+    }
+
+    return `otpauth://${otpMode}/${labelParts.join(':') || 'OTP'}?${params.toString()}`
+  }
+
+  function getGeneratedContentBaseName() {
+    const name = sanitizeFilename([editableIssuer, editableAccount].filter((part) => part.trim()).join('-'))
+    return name || 'otp-auth'
+  }
+
+  function downloadBlob(content: BlobPart, downloadName: string, type: string) {
+    const blob = new Blob([content], { type })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    link.href = url
+    link.download = downloadName
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -748,32 +869,37 @@
         </div>
       {/if}
 
-      {#if parsedSecret.issuer || parsedSecret.account}
-        <dl class="meta">
-          {#if parsedSecret.issuer}
-            <div>
-              <dt>{t.issuer}</dt>
-              <dd>
-                <span>{parsedSecret.issuer}</span>
-                <button type="button" class="meta-copy" onclick={copyIssuer}>
-                  {copiedIssuer ? t.copied : t.copy}
-                </button>
-              </dd>
-            </div>
-          {/if}
-          {#if parsedSecret.account}
-            <div>
-              <dt>{t.account}</dt>
-              <dd>
-                <span>{parsedSecret.account}</span>
-                <button type="button" class="meta-copy" onclick={copyAccount}>
-                  {copiedAccount ? t.copied : t.copy}
-                </button>
-              </dd>
-            </div>
-          {/if}
-        </dl>
-      {/if}
+      <div class="otpauth-builder">
+        <div class="section-heading compact">
+          <div>
+            <span class="muted">{t.generatedOtpAuth}</span>
+            <p>{t.generatedOtpAuthHint}</p>
+          </div>
+        </div>
+
+        <div class="meta-inputs">
+          <div>
+            <label for="issuer-input">{t.issuer}</label>
+            <input id="issuer-input" type="text" bind:value={editableIssuer} autocomplete="off" spellcheck="false" />
+          </div>
+          <div>
+            <label for="account-input">{t.account}</label>
+            <input id="account-input" type="text" bind:value={editableAccount} autocomplete="off" spellcheck="false" />
+          </div>
+        </div>
+
+        <label for="generated-otpauth">{t.generatedOtpAuth}</label>
+        <textarea id="generated-otpauth" class="preview-box otpauth-preview" readonly value={generatedOtpAuthContent}></textarea>
+
+        <div class="otpauth-actions">
+          <button type="button" onclick={copyGeneratedOtpAuthContent} disabled={!generatedOtpAuthContent}>
+            {copiedGeneratedContent ? t.copied : t.copyGeneratedContent}
+          </button>
+          <button type="button" onclick={downloadGeneratedOtpAuthText} disabled={!generatedOtpAuthContent}>{t.downloadTxt}</button>
+          <button type="button" onclick={downloadGeneratedOtpAuthQrSvg} disabled={!generatedOtpAuthContent}>{t.downloadQrSvg}</button>
+          <button type="button" onclick={downloadGeneratedOtpAuthQrPng} disabled={!generatedOtpAuthContent}>{t.downloadQrPng}</button>
+        </div>
+      </div>
     </section>
 
     <section class="file-card" aria-labelledby="file-title">
