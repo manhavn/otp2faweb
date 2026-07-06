@@ -869,36 +869,37 @@
         </div>
       {/if}
 
-      <div class="otpauth-builder">
-        <div class="section-heading compact">
-          <div>
-            <span class="muted">{t.generatedOtpAuth}</span>
-            <p>{t.generatedOtpAuthHint}</p>
-          </div>
-        </div>
+    </section>
 
-        <div class="meta-inputs">
-          <div>
-            <label for="issuer-input">{t.issuer}</label>
-            <input id="issuer-input" type="text" bind:value={editableIssuer} autocomplete="off" spellcheck="false" />
-          </div>
-          <div>
-            <label for="account-input">{t.account}</label>
-            <input id="account-input" type="text" bind:value={editableAccount} autocomplete="off" spellcheck="false" />
-          </div>
+    <section class="otpauth-builder">
+      <div class="section-heading compact">
+        <div>
+          <span class="muted">{t.generatedOtpAuth}</span>
+          <p>{t.generatedOtpAuthHint}</p>
         </div>
+      </div>
 
-        <label for="generated-otpauth">{t.generatedOtpAuth}</label>
-        <textarea id="generated-otpauth" class="preview-box otpauth-preview" readonly value={generatedOtpAuthContent}></textarea>
-
-        <div class="otpauth-actions">
-          <button type="button" onclick={copyGeneratedOtpAuthContent} disabled={!generatedOtpAuthContent}>
-            {copiedGeneratedContent ? t.copied : t.copyGeneratedContent}
-          </button>
-          <button type="button" onclick={downloadGeneratedOtpAuthText} disabled={!generatedOtpAuthContent}>{t.downloadTxt}</button>
-          <button type="button" onclick={downloadGeneratedOtpAuthQrSvg} disabled={!generatedOtpAuthContent}>{t.downloadQrSvg}</button>
-          <button type="button" onclick={downloadGeneratedOtpAuthQrPng} disabled={!generatedOtpAuthContent}>{t.downloadQrPng}</button>
+      <div class="meta-inputs">
+        <div>
+          <label for="issuer-input">{t.issuer}</label>
+          <input id="issuer-input" type="text" bind:value={editableIssuer} autocomplete="off" spellcheck="false" />
         </div>
+        <div>
+          <label for="account-input">{t.account}</label>
+          <input id="account-input" type="text" bind:value={editableAccount} autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+
+      <label for="generated-otpauth">{t.generatedOtpAuth}</label>
+      <textarea id="generated-otpauth" class="preview-box otpauth-preview" readonly value={generatedOtpAuthContent}></textarea>
+
+      <div class="otpauth-actions">
+        <button type="button" onclick={copyGeneratedOtpAuthContent} disabled={!generatedOtpAuthContent}>
+          {copiedGeneratedContent ? t.copied : t.copyGeneratedContent}
+        </button>
+        <button type="button" onclick={downloadGeneratedOtpAuthText} disabled={!generatedOtpAuthContent}>{t.downloadTxt}</button>
+        <button type="button" onclick={downloadGeneratedOtpAuthQrSvg} disabled={!generatedOtpAuthContent}>{t.downloadQrSvg}</button>
+        <button type="button" onclick={downloadGeneratedOtpAuthQrPng} disabled={!generatedOtpAuthContent}>{t.downloadQrPng}</button>
       </div>
     </section>
 
